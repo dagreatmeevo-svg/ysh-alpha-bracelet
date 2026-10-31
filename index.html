@@ -25,7 +25,12 @@ button.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-wei
 .tiegrid{display:grid;grid-template-columns:minmax(0,460px) minmax(0,1fr);gap:14px;align-items:start}
 #chartWrap{overflow:auto;max-height:75vh;background:#15151a;border-radius:10px;border:1px solid var(--line);padding:6px}
 #chart{display:block;margin:auto;touch-action:pan-x pan-y;cursor:pointer}
-body.editing #chart{touch-action:none;cursor:crosshair}
+body.editing #chart{cursor:crosshair}
+body.editing #chartWrap{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc)}
+.lockbtn{font-weight:700;padding:10px 14px}
+body.editing .lockbtn{background:var(--acc);border-color:var(--acc);color:#fff}
+#lockBadge{display:none;font-size:12px;font-weight:700;color:#fff;background:var(--acc);border-radius:20px;padding:3px 10px;margin-left:6px;vertical-align:middle;text-transform:none}
+body.editing #lockBadge{display:inline-block}
 .tiebar{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;background:var(--panel);padding:8px 0;margin-bottom:6px;border-bottom:1px solid var(--line)}
 .tiebar #curLabel{flex:1;text-align:center;font-size:13px;color:var(--ink)}
 .tiebar #curLabel b{color:var(--acc);font-size:16px}
@@ -34,7 +39,8 @@ body.editing #chart{touch-action:none;cursor:crosshair}
 .toggle{display:flex;gap:8px;align-items:center;font-weight:600;margin-bottom:8px}
 @media (max-width:760px){
   .cols,.tiegrid{grid-template-columns:1fr}
-  #chartWrap{max-height:62vh}
+  /* on phones the page itself scrolls through the chart (no box-inside-a-box scrolling) */
+  #chartWrap{max-height:none;overflow:visible}
   #steps{max-height:50vh}
 }
 @media (max-width:600px){
@@ -119,7 +125,7 @@ body.editing #chart{touch-action:none;cursor:crosshair}
   </div>
 
   <div class="card">
-    <h2>Tying chart <small id="dims" style="text-transform:none"></small></h2>
+    <h2>Tying chart <small id="dims" style="text-transform:none"></small><span id="lockBadge">✏️ Painting ON</span></h2>
     <div class="legend" style="margin-bottom:6px">
       <span><b>→</b> odd rows: tie left to right · forward knots</span>
       <span><b>←</b> even rows: tie right to left · backward knots</span>
@@ -143,10 +149,13 @@ body.editing #chart{touch-action:none;cursor:crosshair}
   <div class="cols">
     <div class="card">
       <h2>Change knots</h2>
-      <label class="toggle"><input type="checkbox" id="editMode"> ✏️ Edit mode: tap knots on the chart to paint them</label>
+      <div class="nav">
+        <button id="lock" class="lockbtn">🔒 Painting locked</button>
+        <button id="undo" disabled>↶ Undo</button>
+      </div>
       <div id="paint"></div>
       <label class="note" style="display:flex;gap:8px;align-items:center">Custom colour <input type="color" id="custom" value="#ffffff"></label>
-      <div class="note">With edit mode off, the chart scrolls normally and tapping picks a row. Right-click a knot to pick up its colour.</div>
+      <div class="note">Painting stays locked so a wrong tap never changes a colour. Unlock it to paint: pick a colour, then tap knots on the chart. Lock it again when you're done. Undo takes back the last knot.</div>
     </div>
     <div class="card">
       <h2>Colours used (knots)</h2>
@@ -468,7 +477,7 @@ const IDEA_KEYS = ["ends", "endsR", "between", "trail"];
 function applyIdea(idea){ for (const k of IDEA_KEYS) $(k).value = idea[k] || "same"; }
 applyIdea(IDEAS[0]);
 
-function rebuild(){ state.grid = buildGrid(VARIANTS[state.v], opt()); renderAll(); renderGallery(); renderIdeas(); }
+function rebuild(){ state.grid = buildGrid(VARIANTS[state.v], opt()); undoStack.length = 0; $("undo").disabled = true; renderAll(); renderGallery(); renderIdeas(); }
 function renderIdeas(){
   const box = $("ideas"), o = opt(), v = VARIANTS[state.v];
   box.innerHTML = "";
@@ -527,7 +536,11 @@ function goRow(r, scroll = true){
   redrawChart(); renderSteps();
   const steps = $("steps"), cur = steps.querySelector(".cur");
   if (cur) steps.scrollTop = cur.offsetTop - steps.offsetTop - steps.clientHeight / 2 + cur.clientHeight / 2;
-  if (scroll) { const wrap = $("chartWrap"); wrap.scrollTop = geom.pady + state.row * geom.cy - wrap.clientHeight / 2; }
+  if (scroll) {
+    const wrap = $("chartWrap"), y = geom.pady + state.row * geom.cy;
+    if (wrap.scrollHeight > wrap.clientHeight + 2) wrap.scrollTop = y - wrap.clientHeight / 2;
+    else scrollTo({top: $("chart").getBoundingClientRect().top + scrollY + y - innerHeight / 2, behavior: "smooth"});
+  }
 }
 function renderGallery(){
   const gal = $("gallery"), o = opt();
@@ -559,17 +572,33 @@ $("reset").onclick = rebuild;
 $("steps").onclick = e => { const s = e.target.closest(".step"); if (s) goRow(+s.dataset.r, false); };
 $("next").onclick = () => { state.done.add(state.row); goRow(state.row + 1); };
 $("prev").onclick = () => { state.done.delete(state.row - 1); goRow(state.row - 1); };
-$("editMode").onchange = e => document.body.classList.toggle("editing", e.target.checked);
+let unlocked = false;
+function setLock(open){
+  unlocked = open;
+  document.body.classList.toggle("editing", open);
+  $("lock").textContent = open ? "🔓 Painting ON – tap to lock" : "🔒 Painting locked";
+}
+$("lock").onclick = () => setLock(!unlocked);
 let resizeT; addEventListener("resize", () => { clearTimeout(resizeT); resizeT = setTimeout(redrawChart, 150); });
 
-let painting = false;
-const editing = () => $("editMode").checked;
+// Painting: mouse can drag; on touch screens only a clean tap paints, so swiping always scrolls.
+let painting = false, lastPointer = "mouse";
+const undoStack = [];
+const refreshAfterPaint = () => { redrawChart(); drawBracelet($("strip"), state.grid, VARIANTS[state.v], 18); renderCounts(); renderSteps(); $("undo").disabled = !undoStack.length; };
 const paintAt = ev => { const p = pickCell($("chart"), ev); if (!p) return; const [r, c] = p;
-  if (state.grid[r][c] !== state.paint) { state.grid[r][c] = state.paint; redrawChart(); drawBracelet($("strip"), state.grid, VARIANTS[state.v], 18); renderCounts(); renderSteps(); } };
-$("chart").addEventListener("pointerdown", e => { if (e.button === 2 || !editing()) return; painting = true; paintAt(e); });
+  if (state.grid[r][c] !== state.paint) { undoStack.push([r, c, state.grid[r][c]]); state.grid[r][c] = state.paint; refreshAfterPaint(); } };
+$("chart").addEventListener("pointerdown", e => {
+  lastPointer = e.pointerType;
+  if (e.button === 2 || !unlocked || e.pointerType !== "mouse") return;
+  painting = true; paintAt(e);
+});
 $("chart").addEventListener("pointermove", e => painting && paintAt(e));
-$("chart").addEventListener("click", e => { if (editing()) return; const p = pickCell($("chart"), e); if (p) goRow(p[0], false); });
+$("chart").addEventListener("click", e => {
+  if (unlocked) { if (lastPointer !== "mouse") paintAt(e); return; }
+  const p = pickCell($("chart"), e); if (p) goRow(p[0], false);
+});
 addEventListener("pointerup", () => { if (painting) renderPaint(); painting = false; });
+$("undo").onclick = () => { const h = undoStack.pop(); if (!h) return; state.grid[h[0]][h[1]] = h[2]; refreshAfterPaint(); renderPaint(); };
 $("chart").addEventListener("contextmenu", e => { e.preventDefault(); const p = pickCell($("chart"), e); if (p) { state.paint = state.grid[p[0]][p[1]]; renderPaint(); } });
 
 const fileBase = () => `YSH-alpha-${VARIANTS[state.v].name.replace(/\W+/g, "-")}`;
