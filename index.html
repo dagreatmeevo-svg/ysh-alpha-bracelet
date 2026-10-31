@@ -62,7 +62,8 @@ button.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-wei
 
   <div class="card">
     <div class="controls">
-      <label>Ends <select id="ends"></select></label>
+      <label>Left end <select id="ends"></select></label>
+      <label>Right end <select id="endsR"><option value="same">Same as left</option></select></label>
       <label>Between letters <select id="between"></select></label>
       <label>Extra trail <select id="trail"></select></label>
       <label>Letters <select id="font">
@@ -198,10 +199,31 @@ const SHAPES = {
   chevron:   {name: "Arrows", flip: true, bmp: ["##..",".##.","..##",".##.","##.."]},
   dot:       {name: "Dot", bmp: ["##","##"]},
   bar:       {name: "Line", bmp: ["#","#","#","#","#","#","#","#"]},
+  cat:       {name: "Cat", bmp: ["#.......#","##.....##","#########","##.###.##","#########","####.####",".#######.","..#####.."]},
+  paw:       {name: "Paw", bmp: ["..##.##..","..##.##..","##.....##","##.....##","...###...","..#####..",".#######.","..##.##.."]},
+  note:      {name: "Music", bmp: ["..######","..######","..#....#","..#....#","..#....#","###..###","###..###","##...##."]},
+  sun:       {name: "Sun", bmp: ["....#....",".#.....#.","...###...","..#####..","#.#####.#","..#####..","...###...",".#.....#.","....#...."]},
+  cloud:     {name: "Cloud", bmp: ["...##....",".######..",".#######.","#########","#########",".#######."]},
+  bolt:      {name: "Lightning", bmp: ["..###",".###.",".##..","#####","..##.",".##..",".#...","#...."]},
+  anchor:    {name: "Anchor", bmp: ["...#...","..#.#..","...#...",".#####.","...#...","#..#..#","##.#.##",".#####."]},
+  bow:       {name: "Bow", bmp: ["##.....##","####.####","#########","####.####","##.....##"]},
+  ghost:     {name: "Ghost", bmp: ["..###..",".#####.","##.#.##","#######","#######","#######","#######","#.#.#.#"]},
+  pumpkin:   {name: "Pumpkin", bmp: ["....#....","...##....",".#######.","##.###.##","#########","##.#.#.##",".#######."]},
+  eye:       {name: "Evil eye", bmp: ["...###...",".##...##.","#..###..#","#.#####.#","#..###..#",".##...##.","...###..."]},
+  hilal:     {name: "Crescent & star", flip: true, bmp: [".###.....","##.......","#.....#..","#....###.","#.....#..","##.......",".###....."]},
+  tulip:     {name: "Tulip", bmp: ["#.#.#.#","#######","#######",".#####.","...#...",".#.#.#.","..###..","...#..."]},
+  icecream:  {name: "Ice cream", bmp: [".###.","#####","#####","#.#.#",".###.",".###.","..#..","..#.."]},
+  rainbow:   {name: "Rainbow", bmp: ["..#####..",".#.....#.","#..###..#","#.#...#.#","#.#...#.#"]},
+  fish:      {name: "Fish", flip: true, bmp: ["..####...",".######.#","##.######",".######.#","..####..."]},
+  key:       {name: "Key", flip: true, bmp: [".##......","#..#####.","#..#.#.#.",".##......"]},
+  leaf:      {name: "Leaf", flip: true, bmp: ["....###","..#####",".####.#",".###.##","##.####","#.####.","#......"]},
+  tinyX:     {name: "Tiny cross", bmp: ["#.#",".#.","#.#"]},
+  zigzag:    {name: "Zigzag", bmp: ["#.","#.",".#",".#","#.","#.",".#",".#"]},
 };
-const ENDS    = ["none","heart","miniHeart","star","sparkle","crown","butterfly","smiley","moon","diamond","flower","infinity","chevron"];
-const BETWEEN = ["none","tinyHeart","miniHeart","dot","plus","tinyDiamond","heart","star"];
-const TRAILS  = ["none","tinyHeart","dot","plus","chevron","bar"];
+const ENDS    = ["none","heart","miniHeart","star","sparkle","crown","butterfly","smiley","moon","diamond","flower","infinity","chevron",
+                 "cat","paw","note","sun","cloud","bolt","anchor","bow","ghost","pumpkin","eye","hilal","tulip","icecream","rainbow","fish","key","leaf"];
+const BETWEEN = ["none","tinyHeart","miniHeart","dot","plus","tinyDiamond","tinyX","heart","star"];
+const TRAILS  = ["none","tinyHeart","dot","plus","tinyX","chevron","zigzag","bar"];
 
 // ready-made shape combinations
 const IDEAS = [
@@ -219,6 +241,22 @@ const IDEAS = [
   {name: "Arrows",            ends: "chevron",   between: "dot",       trail: "chevron"},
   {name: "Sparkle",           ends: "sparkle",   between: "tinyHeart", trail: "plus"},
   {name: "Clean & simple",    ends: "none",      between: "tinyHeart", trail: "bar"},
+  {name: "Kitty",             ends: "cat",       between: "tinyHeart", trail: "dot"},
+  {name: "Paws",              ends: "paw",       between: "dot",       trail: "none"},
+  {name: "Music",             ends: "note",      between: "dot",       trail: "zigzag"},
+  {name: "Sunny day",         ends: "sun",       endsR: "cloud", between: "plus", trail: "none"},
+  {name: "Storm",             ends: "cloud",     endsR: "bolt",  between: "tinyX", trail: "none"},
+  {name: "Sailor",            ends: "anchor",    between: "dot",       trail: "zigzag"},
+  {name: "Sweet bow",         ends: "bow",       between: "tinyHeart", trail: "dot"},
+  {name: "Spooky",            ends: "ghost",     endsR: "pumpkin", between: "tinyX", trail: "none"},
+  {name: "Evil eye",          ends: "eye",       between: "dot",       trail: "plus"},
+  {name: "Crescent & star",   ends: "hilal",     between: "plus",      trail: "plus"},
+  {name: "Tulips",            ends: "tulip",     between: "tinyHeart", trail: "none"},
+  {name: "Ice cream",         ends: "icecream",  between: "dot",       trail: "tinyHeart"},
+  {name: "Rainbow",           ends: "rainbow",   endsR: "cloud", between: "tinyHeart", trail: "none"},
+  {name: "Fishy",             ends: "fish",      between: "dot",       trail: "dot"},
+  {name: "Key to my heart",   ends: "key",       endsR: "heart", between: "tinyHeart", trail: "none"},
+  {name: "Nature",            ends: "leaf",      endsR: "flower", between: "dot", trail: "none"},
 ];
 
 // two colours like the reference bracelets: background + letters (heart usually the letter colour)
@@ -257,8 +295,9 @@ function planItems(o, gap){
   if (o.ends !== "none") {
     const e = sh(o.ends);
     left.push({bmp: e.flip ? mirror(e.bmp) : e.bmp, shape: true}, 3);
-    right.unshift(3, {bmp: e.bmp, shape: true});
   }
+  const rk = o.endsR && o.endsR !== "same" ? o.endsR : o.ends;
+  if (rk !== "none") right.push(3, {bmp: sh(rk).bmp, shape: true});
   return {left, mid, right};
 }
 const lenOf = items => items.reduce((n, it) => n + (typeof it === "number" ? it : it.bmp[0].length), 0);
@@ -383,12 +422,13 @@ function pickCell(cv, ev){
 // ---------- app ----------
 const $ = id => document.getElementById(id);
 const state = {v: 0, grid: null, paint: null, row: 0, done: new Set()};
-const opt = () => ({ends: $("ends").value, between: $("between").value, trail: $("trail").value,
+const opt = () => ({ends: $("ends").value, endsR: $("endsR").value, between: $("between").value, trail: $("trail").value,
                     font: $("font").value, gap: +$("gap").value, edge: $("edge").checked});
 
 const fill = (id, keys) => keys.forEach(k => $(id).add(new Option(k === "none" ? "None" : SHAPES[k].name, k)));
-fill("ends", ENDS); fill("between", BETWEEN); fill("trail", TRAILS);
-function applyIdea(idea){ for (const k of ["ends", "between", "trail"]) $(k).value = idea[k]; }
+fill("ends", ENDS); fill("endsR", ENDS); fill("between", BETWEEN); fill("trail", TRAILS);
+const IDEA_KEYS = ["ends", "endsR", "between", "trail"];
+function applyIdea(idea){ for (const k of IDEA_KEYS) $(k).value = idea[k] || "same"; }
 applyIdea(IDEAS[0]);
 
 function rebuild(){ state.grid = buildGrid(VARIANTS[state.v], opt()); renderAll(); renderGallery(); renderIdeas(); }
@@ -397,10 +437,11 @@ function renderIdeas(){
   box.innerHTML = "";
   IDEAS.forEach(idea => {
     const d = document.createElement("div");
-    const on = ["ends", "between", "trail"].every(k => idea[k] === o[k]);
+    const full = {endsR: "same", ...idea};
+    const on = IDEA_KEYS.every(k => full[k] === o[k]);
     d.className = "thumb" + (on ? " on" : "");
     const cv = document.createElement("canvas");
-    drawBracelet(cv, buildGrid(v, {...o, ...idea}), v, 6);
+    drawBracelet(cv, buildGrid(v, {...o, ...full}), v, 6);
     d.append(cv);
     d.insertAdjacentHTML("beforeend", `<b>${idea.name}</b>`);
     d.onclick = () => { applyIdea(idea); rebuild(); };
@@ -464,10 +505,11 @@ function renderGallery(){
 
 $("paint").onclick = e => { const s = e.target.closest(".sw"); if (s) { state.paint = s.dataset.c; renderPaint(); } };
 $("custom").oninput = e => { state.paint = e.target.value; renderPaint(); };
-for (const id of ["ends", "between", "trail", "font", "gap", "edge"]) $(id).onchange = rebuild;
+for (const id of ["ends", "endsR", "between", "trail", "font", "gap", "edge"]) $(id).onchange = rebuild;
 const pick = a => a[Math.floor(Math.random() * a.length)];
 $("surprise").onclick = () => {
-  applyIdea({ends: pick(ENDS.slice(1)), between: pick(BETWEEN.slice(0, 6)), trail: pick(TRAILS)});
+  applyIdea({ends: pick(ENDS.slice(1)), endsR: Math.random() < 0.3 ? pick(ENDS.slice(1)) : "same",
+             between: pick(BETWEEN.slice(0, 7)), trail: pick(TRAILS)});
   state.v = Math.floor(Math.random() * VARIANTS.length); state.paint = null;
   rebuild();
 };
