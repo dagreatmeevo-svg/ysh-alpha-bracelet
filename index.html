@@ -21,10 +21,35 @@ main{max-width:1200px;margin:auto;padding:0 16px 40px}
 select,button{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font:inherit;cursor:pointer}
 button:hover,select:hover{border-color:var(--acc)}
 button.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
-.cols{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start}
-@media (max-width:760px){.cols{grid-template-columns:1fr}}
-#chartWrap{overflow:auto;max-height:82vh;background:#15151a;border-radius:10px;border:1px solid var(--line);padding:6px}
-#chart{display:block;cursor:crosshair;touch-action:none}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+.tiegrid{display:grid;grid-template-columns:minmax(0,460px) minmax(0,1fr);gap:14px;align-items:start}
+#chartWrap{overflow:auto;max-height:75vh;background:#15151a;border-radius:10px;border:1px solid var(--line);padding:6px}
+#chart{display:block;margin:auto;touch-action:pan-x pan-y;cursor:pointer}
+body.editing #chart{touch-action:none;cursor:crosshair}
+.tiebar{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;background:var(--panel);padding:8px 0;margin-bottom:6px;border-bottom:1px solid var(--line)}
+.tiebar #curLabel{flex:1;text-align:center;font-size:13px;color:var(--ink)}
+.tiebar #curLabel b{color:var(--acc);font-size:16px}
+.exports{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.exports button{padding:10px 16px}
+.toggle{display:flex;gap:8px;align-items:center;font-weight:600;margin-bottom:8px}
+@media (max-width:760px){
+  .cols,.tiegrid{grid-template-columns:1fr}
+  #chartWrap{max-height:62vh}
+  #steps{max-height:50vh}
+}
+@media (max-width:600px){
+  header,main{padding-left:12px;padding-right:12px}
+  h1{font-size:19px}
+  .card{padding:12px}
+  .controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .controls label{flex-direction:column;align-items:stretch;gap:3px;font-size:12px}
+  .controls label:has(input[type=checkbox]){flex-direction:row;align-items:center}
+  .controls select{width:100%}
+  .gal{grid-template-columns:1fr 1fr !important;gap:8px}
+  .thumb{padding:5px}
+  .thumb b{font-size:12px}
+  .exports button{flex:1}
+}
 .sw{display:inline-flex;align-items:center;gap:6px;margin:3px 8px 3px 0;padding:4px 8px 4px 4px;border-radius:6px;background:var(--panel2);border:2px solid transparent;cursor:pointer;font-size:12px}
 .sw i{width:20px;height:20px;border-radius:50%;display:block;border:1px solid #0006}
 .sw.on{border-color:var(--acc)}
@@ -37,14 +62,15 @@ button.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-wei
 #counts .sw{cursor:default}
 .legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--mute)}
 .legend b{color:var(--ink)}
-#steps{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+#steps{max-height:75vh;overflow:auto;border:1px solid var(--line);border-radius:8px}
 .step{display:flex;gap:10px;align-items:center;padding:6px 10px;border-bottom:1px solid var(--line);cursor:pointer;font-size:13px}
 .step:last-child{border-bottom:0}
 .step.cur{background:#ff6a3d22;outline:2px solid var(--acc);outline-offset:-2px}
 .step.done{opacity:.45}
-.step .rn{width:64px;flex:none;color:var(--mute)}
+.step .rn{width:56px;flex:none;color:var(--mute)}
 .step .dir{width:22px;flex:none;font-size:16px;text-align:center}
-.run{display:inline-flex;align-items:center;gap:3px;margin-right:6px}
+.runs{display:flex;flex-wrap:wrap;gap:4px 10px}
+.run{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
 .run i{width:14px;height:14px;border-radius:3px;border:1px solid #0006;display:inline-block}
 .nav{display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap}
 </style>
@@ -79,7 +105,6 @@ button.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-wei
       <label><input type="checkbox" id="arrows" checked> Arrows on chart</label>
       <button id="surprise">✨ Surprise me</button>
       <button id="reset">Reset edits</button>
-      <button id="png" class="primary">Download chart PNG</button>
     </div>
   </div>
 
@@ -93,37 +118,39 @@ button.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-wei
     <div id="gallery" class="gal"></div>
   </div>
 
+  <div class="card">
+    <h2>Tying chart <small id="dims" style="text-transform:none"></small></h2>
+    <div class="legend" style="margin-bottom:6px">
+      <span><b>→</b> odd rows: tie left to right · forward knots</span>
+      <span><b>←</b> even rows: tie right to left · backward knots</span>
+    </div>
+    <div class="tiebar">
+      <button id="prev">◀ Prev</button>
+      <span id="curLabel"></span>
+      <button id="next" class="primary">Next ▶</button>
+    </div>
+    <div class="tiegrid">
+      <div id="chartWrap"><canvas id="chart"></canvas></div>
+      <div id="steps"></div>
+    </div>
+    <div class="note">Row 1 is the start of the bracelet. Tap a row on the chart or in the list to jump to it. Each row lists its colours in the order you tie them, following the arrow. The letters lie on their side in the chart and read upright on the finished bracelet.</div>
+    <div class="exports">
+      <button id="pdf" class="primary">⬇ Download PDF (preview + tying chart)</button>
+      <button id="png">Chart PNG</button>
+    </div>
+  </div>
+
   <div class="cols">
     <div class="card">
-      <h2>Tying chart <small id="dims" style="text-transform:none"></small></h2>
-      <div class="legend" style="margin-bottom:8px">
-        <span><b>→</b> tie left to right · forward knots</span>
-        <span><b>←</b> tie right to left · backward knots</span>
-      </div>
-      <div id="chartWrap"><canvas id="chart"></canvas></div>
-      <div class="note">The chart runs from the start of the bracelet (top) to the end (bottom), so the letters lie on their side here. They read upright on the finished bracelet, as in the picture above.</div>
+      <h2>Change knots</h2>
+      <label class="toggle"><input type="checkbox" id="editMode"> ✏️ Edit mode: tap knots on the chart to paint them</label>
+      <div id="paint"></div>
+      <label class="note" style="display:flex;gap:8px;align-items:center">Custom colour <input type="color" id="custom" value="#ffffff"></label>
+      <div class="note">With edit mode off, the chart scrolls normally and tapping picks a row. Right-click a knot to pick up its colour.</div>
     </div>
-    <div>
-      <div class="card">
-        <h2>How to tie it, row by row</h2>
-        <div class="nav">
-          <button id="prev">◀ Prev row</button>
-          <button id="next" class="primary">Next row ▶</button>
-          <span id="curLabel" class="note" style="margin:0"></span>
-        </div>
-        <div id="steps"></div>
-        <div class="note">Tap a row to jump to it; it's highlighted on the chart. Each row shows its colours in the order you tie them, following the arrow.</div>
-      </div>
-      <div class="card">
-        <h2>Paint colour</h2>
-        <div id="paint"></div>
-        <label class="note" style="display:flex;gap:8px;align-items:center">Custom colour <input type="color" id="custom" value="#ffffff"></label>
-        <div class="note">Click a colour, then click or drag on the chart. Right-click a knot to pick up its colour.</div>
-      </div>
-      <div class="card">
-        <h2>Colours used (knots)</h2>
-        <div id="counts"></div>
-      </div>
+    <div class="card">
+      <h2>Colours used (knots)</h2>
+      <div id="counts"></div>
     </div>
   </div>
 </main>
@@ -383,41 +410,51 @@ function drawBracelet(cv, grid, v, s){
   ctx.restore();
 }
 
-const CX = 28, CY = 24, PADX = 34, PADY = 16;
-function drawArrow(ctx, x, y, dir, color){
-  const L = CX * 0.26;
-  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 1.6;
-  ctx.beginPath(); ctx.moveTo(x - dir * L, y); ctx.lineTo(x + dir * (L - 3), y); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(x + dir * L, y); ctx.lineTo(x + dir * (L - 5), y - 4); ctx.lineTo(x + dir * (L - 5), y + 4); ctx.closePath(); ctx.fill();
+// chart geometry in CSS pixels; cell size follows the screen width
+const geom = {cx: 28, cy: 24, padx: 28, pady: 12};
+function fitChart(){
+  const avail = Math.max(240, $("chartWrap").clientWidth - 14);
+  geom.cx = Math.max(18, Math.min(32, Math.floor((avail - 2 * geom.padx) / W)));
+  geom.cy = Math.round(geom.cx * 0.82);
 }
-function drawChart(cv, grid, {scale = 1, arrows = true, current = -1} = {}){
-  const w = (W * CX + PADX * 2) * scale, h = (H * CY + PADY * 2) * scale;
-  cv.width = w; cv.height = h;
+function drawArrow(ctx, x, y, dir, color, L){
+  const head = Math.max(3, L * 0.55);
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = Math.max(1.2, L * 0.22);
+  ctx.beginPath(); ctx.moveTo(x - dir * L, y); ctx.lineTo(x + dir * (L - head * 0.6), y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x + dir * L, y); ctx.lineTo(x + dir * (L - head), y - head * 0.7); ctx.lineTo(x + dir * (L - head), y + head * 0.7); ctx.closePath(); ctx.fill();
+}
+function drawChart(cv, grid, {scale = 1, arrows = true, current = -1, g = geom} = {}){
+  const {cx, cy, padx, pady} = g;
+  const cssW = W * cx + padx * 2, cssH = H * cy + pady * 2;
+  cv.width = Math.round(cssW * scale); cv.height = Math.round(cssH * scale);
   const ctx = cv.getContext("2d");
   ctx.scale(scale, scale);
-  ctx.fillStyle = "#15151a"; ctx.fillRect(0, 0, w, h);
-  ctx.font = "10px system-ui"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillStyle = "#15151a"; ctx.fillRect(0, 0, cssW, cssH);
+  ctx.font = `${Math.max(9, cy * 0.45)}px system-ui`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
   for (let r = 0; r < H; r++) {
-    const y = PADY + r * CY;
-    ctx.fillStyle = r === current ? "#ff6a3d" : "#777";
+    const y = pady + r * cy;
+    if (r === current) { ctx.fillStyle = "#ff6a3d"; ctx.fillRect(padx - 4, y - 2, W * cx + 8, cy + 4); }
+    ctx.fillStyle = r === current ? "#ff6a3d" : "#888";
     if ((r + 1) % 5 === 0 || r === 0 || r === current) {
-      ctx.fillText(r + 1, PADX / 2, y + CY / 2); ctx.fillText(r + 1, PADX + W * CX + PADX / 2, y + CY / 2);
+      ctx.fillText(r + 1, padx / 2 - 2, y + cy / 2); ctx.fillText(r + 1, padx + W * cx + padx / 2 + 2, y + cy / 2);
     }
     for (let c = 0; c < W; c++) {
-      const x = PADX + c * CX, col = grid[r][c];
-      ctx.fillStyle = col; ctx.fillRect(x + 1, y + 1, CX - 2, CY - 2);
-      if (arrows) drawArrow(ctx, x + CX / 2, y + CY / 2, forward(r) ? 1 : -1, luminance(col) > 0.55 ? "#0009" : "#fffb");
+      const x = padx + c * cx, col = grid[r][c];
+      ctx.fillStyle = col; ctx.fillRect(x + 1, y + 1, cx - 2, cy - 2);
+      if (arrows) drawArrow(ctx, x + cx / 2, y + cy / 2, forward(r) ? 1 : -1, luminance(col) > 0.55 ? "#0009" : "#fffb", cx * 0.26);
     }
-    if (r === current) { ctx.strokeStyle = "#ff6a3d"; ctx.lineWidth = 3; ctx.strokeRect(PADX - 2, y - 1, W * CX + 4, CY + 2); }
+    // a thicker line every 5 rows makes counting easier
+    if ((r + 1) % 5 === 0) { ctx.fillStyle = "#15151a"; ctx.fillRect(padx, y + cy - 1, W * cx, 2); }
   }
 }
 function pickCell(cv, ev){
   const rect = cv.getBoundingClientRect();
-  const px = (ev.clientX - rect.left) * (cv.width / rect.width);
-  const py = (ev.clientY - rect.top) * (cv.height / rect.height);
-  const r = Math.floor((py - PADY) / CY), c = Math.floor((px - PADX) / CX);
+  const px = ev.clientX - rect.left, py = ev.clientY - rect.top;
+  const r = Math.floor((py - geom.pady) / geom.cy), c = Math.floor((px - geom.padx) / geom.cx);
   return (r >= 0 && r < H && c >= 0 && c < W) ? [r, c] : null;
 }
+if (!CanvasRenderingContext2D.prototype.roundRect)       // older phones
+  CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h){ this.rect(x, y, w, h); };
 
 // ---------- app ----------
 const $ = id => document.getElementById(id);
@@ -448,7 +485,13 @@ function renderIdeas(){
     box.append(d);
   });
 }
-function redrawChart(){ drawChart($("chart"), state.grid, {arrows: $("arrows").checked, current: state.row}); $("chart").style.width = (W * CX + PADX * 2) + "px"; }
+function redrawChart(){
+  fitChart();
+  const cv = $("chart");
+  drawChart(cv, state.grid, {arrows: $("arrows").checked, current: state.row, scale: Math.min(3, devicePixelRatio || 1)});
+  cv.style.width = (W * geom.cx + geom.padx * 2) + "px";
+  cv.style.height = (H * geom.cy + geom.pady * 2) + "px";
+}
 function renderAll(){
   redrawChart();
   drawBracelet($("strip"), state.grid, VARIANTS[state.v], 18);
@@ -475,18 +518,16 @@ function renderSteps(){
   $("steps").innerHTML = state.grid.map((_, r) => {
     const runs = rowRuns(r).map(([c, n]) => `<span class="run">${n}×<i style="background:${c}"></i></span>`).join("");
     return `<div class="step ${r === state.row ? "cur" : ""} ${state.done.has(r) ? "done" : ""}" data-r="${r}">
-      <span class="rn">Row ${r + 1}</span><span class="dir">${forward(r) ? "→" : "←"}</span><span>${runs}</span></div>`;
+      <span class="rn">Row ${r + 1}</span><span class="dir">${forward(r) ? "→" : "←"}</span><span class="runs">${runs}</span></div>`;
   }).join("");
-  $("curLabel").textContent = `Row ${state.row + 1} of ${H} · ${forward(state.row) ? "→ forward knots, left to right" : "← backward knots, right to left"}`;
+  $("curLabel").innerHTML = `<b>Row ${state.row + 1}</b> / ${H}<br>${forward(state.row) ? "→ forward knots" : "← backward knots"}`;
 }
 function goRow(r, scroll = true){
   state.row = Math.max(0, Math.min(H - 1, r));
   redrawChart(); renderSteps();
-  if (scroll) {
-    $("steps").querySelector(".cur")?.scrollIntoView({block: "nearest"});
-    const wrap = $("chartWrap");
-    wrap.scrollTop = PADY + state.row * CY - wrap.clientHeight / 2;
-  }
+  const steps = $("steps"), cur = steps.querySelector(".cur");
+  if (cur) steps.scrollTop = cur.offsetTop - steps.offsetTop - steps.clientHeight / 2 + cur.clientHeight / 2;
+  if (scroll) { const wrap = $("chartWrap"); wrap.scrollTop = geom.pady + state.row * geom.cy - wrap.clientHeight / 2; }
 }
 function renderGallery(){
   const gal = $("gallery"), o = opt();
@@ -518,22 +559,133 @@ $("reset").onclick = rebuild;
 $("steps").onclick = e => { const s = e.target.closest(".step"); if (s) goRow(+s.dataset.r, false); };
 $("next").onclick = () => { state.done.add(state.row); goRow(state.row + 1); };
 $("prev").onclick = () => { state.done.delete(state.row - 1); goRow(state.row - 1); };
+$("editMode").onchange = e => document.body.classList.toggle("editing", e.target.checked);
+let resizeT; addEventListener("resize", () => { clearTimeout(resizeT); resizeT = setTimeout(redrawChart, 150); });
 
 let painting = false;
+const editing = () => $("editMode").checked;
 const paintAt = ev => { const p = pickCell($("chart"), ev); if (!p) return; const [r, c] = p;
   if (state.grid[r][c] !== state.paint) { state.grid[r][c] = state.paint; redrawChart(); drawBracelet($("strip"), state.grid, VARIANTS[state.v], 18); renderCounts(); renderSteps(); } };
-$("chart").addEventListener("pointerdown", e => { if (e.button === 2) return; painting = true; paintAt(e); });
+$("chart").addEventListener("pointerdown", e => { if (e.button === 2 || !editing()) return; painting = true; paintAt(e); });
 $("chart").addEventListener("pointermove", e => painting && paintAt(e));
+$("chart").addEventListener("click", e => { if (editing()) return; const p = pickCell($("chart"), e); if (p) goRow(p[0], false); });
 addEventListener("pointerup", () => { if (painting) renderPaint(); painting = false; });
 $("chart").addEventListener("contextmenu", e => { e.preventDefault(); const p = pickCell($("chart"), e); if (p) { state.paint = state.grid[p[0]][p[1]]; renderPaint(); } });
 
+const fileBase = () => `YSH-alpha-${VARIANTS[state.v].name.replace(/\W+/g, "-")}`;
 $("png").onclick = () => {
   const out = document.createElement("canvas");
-  drawChart(out, state.grid, {scale: 2, arrows: $("arrows").checked});
+  drawChart(out, state.grid, {scale: 2, arrows: $("arrows").checked, g: {cx: 30, cy: 25, padx: 30, pady: 14}});
   const a = document.createElement("a");
-  a.download = `YSH-alpha-${VARIANTS[state.v].name.replace(/\W+/g, "-")}.png`;
+  a.download = fileBase() + ".png";
   a.href = out.toDataURL("image/png"); a.click();
 };
+
+// ---------- PDF: page 1 = preview + colours + how to read; then the tying chart with row-by-row steps ----------
+let jsPDFReady;
+function loadJsPDF(){
+  return jsPDFReady ||= new Promise((ok, fail) => {
+    const s = document.createElement("script");
+    s.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+    s.onload = () => ok(window.jspdf.jsPDF); s.onerror = () => { jsPDFReady = null; fail(new Error("Could not load the PDF library. Check your internet connection.")); };
+    document.head.append(s);
+  });
+}
+const SITE = "dagreatmeevo-svg.github.io/ysh-alpha-bracelet";
+async function exportPDF(){
+  const btn = $("pdf"), label = btn.textContent;
+  btn.disabled = true; btn.textContent = "Making PDF…";
+  try {
+    const jsPDF = await loadJsPDF();
+    const doc = new jsPDF({unit: "mm", format: "a4"});
+    const v = VARIANTS[state.v], o = opt(), grid = state.grid;
+    const PW = 210, PH = 297, M = 14;
+    const shapeName = k => k === "none" ? "none" : k === "same" ? "same as left" : SHAPES[k].name;
+    const footer = (p, n) => { doc.setFontSize(8); doc.setTextColor(140); doc.text(`YSH alpha bracelet · ${SITE}`, M, PH - 8); doc.text(`Page ${p} of ${n}`, PW - M, PH - 8, {align: "right"}); };
+    const chartPages = 2, total = 1 + chartPages;
+
+    // page 1
+    doc.setFont("helvetica", "bold"); doc.setFontSize(22); doc.setTextColor(30);
+    doc.text("YSH alpha bracelet", M, M + 8);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(90);
+    doc.text(`${v.name}  ·  12 knots wide x 65 rows  ·  ${grid.flat().length} knots`, M, M + 15);
+    doc.text(`Ends: ${shapeName(o.ends)} / ${shapeName(o.endsR)}   Between letters: ${shapeName(o.between)}   Trail: ${shapeName(o.trail)}`, M, M + 21);
+    const pv = document.createElement("canvas");
+    drawBracelet(pv, grid, v, 22);
+    const pvW = PW - 2 * M, pvH = pvW * pv.height / pv.width;
+    doc.addImage(pv.toDataURL("image/jpeg", 0.92), "JPEG", M, M + 27, pvW, pvH);
+    let y = M + 27 + pvH + 12;
+    doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.setTextColor(30);
+    doc.text("Colours", M, y); y += 7;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(11);
+    for (const [c, n] of colorsOf(grid)) {
+      doc.setFillColor(...rgb(c)); doc.setDrawColor(120); doc.setLineWidth(0.2);
+      doc.roundedRect(M, y - 4.5, 9, 6, 1, 1, "FD");
+      doc.setTextColor(40); doc.text(`${c.toUpperCase()}  —  ${n} knots`, M + 13, y);
+      y += 9;
+    }
+    y += 5;
+    doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.text("How to read the chart", M, y); y += 7;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(50);
+    [
+      "Row 1 is the start of the bracelet; work down the chart row by row.",
+      "Odd rows (1, 3, 5...): tie left to right with forward knots (arrow points right).",
+      "Even rows (2, 4, 6...): tie right to left with backward knots (arrow points left).",
+      "Next to each row, the colours are listed in the order you tie them, e.g. 4 pink, 2 white, 6 pink.",
+      "The letters lie on their side in the chart; they read upright on the finished bracelet.",
+      "Tick the box next to a row when it's done so you never lose your place.",
+    ].forEach(t => { const lines = doc.splitTextToSize("•  " + t, PW - 2 * M); doc.text(lines, M, y); y += lines.length * 6; });
+    footer(1, total);
+
+    // chart pages
+    const per = Math.ceil(H / chartPages), cw = 7, ch = 7, cx0 = M + 9, top = M + 16;
+    for (let p = 0; p < chartPages; p++) {
+      doc.addPage();
+      const r0 = p * per, r1 = Math.min(H, r0 + per);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(15); doc.setTextColor(30);
+      doc.text(`Tying chart — rows ${r0 + 1} to ${r1}`, M, M + 6);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(110);
+      doc.text("Arrow right = forward knot, left to right.   Arrow left = backward knot, right to left.", M, M + 11);
+      for (let r = r0; r < r1; r++) {
+        const yy = top + (r - r0) * ch, dir = forward(r) ? 1 : -1;
+        doc.setFontSize(8); doc.setTextColor(r % 5 === 4 ? 30 : 130);
+        doc.text(String(r + 1), cx0 - 2, yy + ch / 2 + 1.2, {align: "right"});
+        for (let c = 0; c < W; c++) {
+          const x = cx0 + c * cw, col = grid[r][c];
+          doc.setFillColor(...rgb(col)); doc.setDrawColor(90); doc.setLineWidth(0.15);
+          doc.rect(x, yy, cw, ch, "FD");
+          const ac = luminance(col) > 0.55 ? 40 : 255;
+          doc.setDrawColor(ac); doc.setFillColor(ac); doc.setLineWidth(0.35);
+          const mx = x + cw / 2, my = yy + ch / 2, L = cw * 0.28;
+          doc.line(mx - dir * L, my, mx + dir * (L - 0.8), my);
+          doc.triangle(mx + dir * L, my, mx + dir * (L - 1.5), my - 1.1, mx + dir * (L - 1.5), my + 1.1, "F");
+        }
+        if (r % 5 === 4) { doc.setDrawColor(20); doc.setLineWidth(0.6); doc.line(cx0, yy + ch, cx0 + W * cw, yy + ch); }
+        // row steps beside the chart
+        let sx = cx0 + W * cw + 6;
+        doc.setDrawColor(120); doc.setLineWidth(0.2); doc.rect(sx, yy + 1.6, 3.8, 3.8);
+        sx += 6;
+        doc.setFontSize(9); doc.setTextColor(60);
+        doc.text(dir > 0 ? "->" : "<-", sx, yy + ch / 2 + 1.2); sx += 6;
+        const runs = rowRuns(r), unit = Math.min(9, (PW - M - sx) / runs.length);   // squeeze busy rows to fit
+        const sw = Math.max(2.4, Math.min(4, unit - 3.4));
+        for (const [c, n] of runs) {
+          doc.setTextColor(30); doc.text(String(n), sx, yy + ch / 2 + 1.2);
+          const nx = sx + (n > 9 ? 3.8 : 2.1);
+          doc.setFillColor(...rgb(c)); doc.setDrawColor(110); doc.rect(nx, yy + 1.8, sw, 3.4, "FD");
+          sx += unit;
+        }
+      }
+      footer(p + 2, total);
+    }
+    doc.save(fileBase() + ".pdf");
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = label;
+  }
+}
+$("pdf").onclick = exportPDF;
 
 rebuild();
 </script>
