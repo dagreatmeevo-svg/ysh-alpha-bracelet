@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>YSH Alpha Bracelet</title>
+<style>
+:root{--bg:#1c1c20;--panel:#26262c;--panel2:#2f2f36;--ink:#ececf1;--mute:#9a9aa6;--acc:#ff6a3d;--line:#3a3a42}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,"Segoe UI",Tahoma,sans-serif}
+header{padding:18px 16px 8px;max-width:1200px;margin:auto}
+h1{margin:0;font-size:22px}
+h1 span{color:var(--acc)}
+.sub{color:var(--mute);font-size:13px}
+main{max-width:1200px;margin:auto;padding:0 16px 40px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:14px}
+.card h2{margin:0 0 10px;font-size:15px;color:var(--mute);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+#strip{width:100%;height:auto;display:block;border-radius:8px}
+.controls{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.controls label{display:flex;gap:6px;align-items:center;color:var(--mute)}
+select,button{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font:inherit;cursor:pointer}
+button:hover,select:hover{border-color:var(--acc)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+.cols{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start}
+@media (max-width:760px){.cols{grid-template-columns:1fr}}
+#chartWrap{overflow:auto;max-height:82vh;background:#15151a;border-radius:10px;border:1px solid var(--line);padding:6px}
+#chart{display:block;cursor:crosshair;touch-action:none}
+.sw{display:inline-flex;align-items:center;gap:6px;margin:3px 8px 3px 0;padding:4px 8px 4px 4px;border-radius:6px;background:var(--panel2);border:2px solid transparent;cursor:pointer;font-size:12px}
+.sw i{width:20px;height:20px;border-radius:50%;display:block;border:1px solid #0006}
+.sw.on{border-color:var(--acc)}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.thumb{background:var(--panel2);border:2px solid transparent;border-radius:8px;padding:8px;cursor:pointer}
+.thumb.on{border-color:var(--acc)}
+.thumb canvas{width:100%;display:block;border-radius:4px}
+.thumb b{display:block;margin-top:6px;font-size:13px}
+.note{color:var(--mute);font-size:12.5px;margin-top:8px}
+#counts .sw{cursor:default}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--mute)}
+.legend b{color:var(--ink)}
+#steps{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.step{display:flex;gap:10px;align-items:center;padding:6px 10px;border-bottom:1px solid var(--line);cursor:pointer;font-size:13px}
+.step:last-child{border-bottom:0}
+.step.cur{background:#ff6a3d22;outline:2px solid var(--acc);outline-offset:-2px}
+.step.done{opacity:.45}
+.step .rn{width:64px;flex:none;color:var(--mute)}
+.step .dir{width:22px;flex:none;font-size:16px;text-align:center}
+.run{display:inline-flex;align-items:center;gap:3px;margin-right:6px}
+.run i{width:14px;height:14px;border-radius:3px;border:1px solid #0006;display:inline-block}
+.nav{display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<header>
+  <h1>Alpha bracelet: <span>YSH</span></h1>
+  <div class="sub">12 knots wide · 65 rows long · alpha pattern. Pick a colour idea, follow the arrows row by row, and click or drag on the chart to make your own changes.</div>
+</header>
+<main>
+  <div class="card">
+    <h2>How it will look</h2>
+    <canvas id="strip"></canvas>
+  </div>
+
+  <div class="card">
+    <div class="controls">
+      <label>Ends <select id="ends"></select></label>
+      <label>Between letters <select id="between"></select></label>
+      <label>Extra trail <select id="trail"></select></label>
+      <label>Letters <select id="font">
+        <option value="big" selected>Bold (8 knots tall)</option>
+        <option value="small">Small (6 knots tall)</option>
+      </select></label>
+      <label>Letter gap <select id="gap">
+        <option value="1">1 knot</option>
+        <option value="2" selected>2 knots</option>
+        <option value="3">3 knots</option>
+      </select></label>
+      <label><input type="checkbox" id="edge"> Border line</label>
+      <label><input type="checkbox" id="arrows" checked> Arrows on chart</label>
+      <button id="surprise">✨ Surprise me</button>
+      <button id="reset">Reset edits</button>
+      <button id="png" class="primary">Download chart PNG</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Shape ideas</h2>
+    <div id="ideas" class="gal"></div>
+  </div>
+
+  <div class="card">
+    <h2>Colour ideas</h2>
+    <div id="gallery" class="gal"></div>
+  </div>
+
+  <div class="cols">
+    <div class="card">
+      <h2>Tying chart <small id="dims" style="text-transform:none"></small></h2>
+      <div class="legend" style="margin-bottom:8px">
+        <span><b>→</b> tie left to right · forward knots</span>
+        <span><b>←</b> tie right to left · backward knots</span>
+      </div>
+      <div id="chartWrap"><canvas id="chart"></canvas></div>
+      <div class="note">The chart runs from the start of the bracelet (top) to the end (bottom), so the letters lie on their side here. They read upright on the finished bracelet, as in the picture above.</div>
+    </div>
+    <div>
+      <div class="card">
+        <h2>How to tie it, row by row</h2>
+        <div class="nav">
+          <button id="prev">◀ Prev row</button>
+          <button id="next" class="primary">Next row ▶</button>
+          <span id="curLabel" class="note" style="margin:0"></span>
+        </div>
+        <div id="steps"></div>
+        <div class="note">Tap a row to jump to it; it's highlighted on the chart. Each row shows its colours in the order you tie them, following the arrow.</div>
+      </div>
+      <div class="card">
+        <h2>Paint colour</h2>
+        <div id="paint"></div>
+        <label class="note" style="display:flex;gap:8px;align-items:center">Custom colour <input type="color" id="custom" value="#ffffff"></label>
+        <div class="note">Click a colour, then click or drag on the chart. Right-click a knot to pick up its colour.</div>
+      </div>
+      <div class="card">
+        <h2>Colours used (knots)</h2>
+        <div id="counts"></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+const W = 12, H = 65;                               // knots across × rows along the bracelet
+const forward = r => !(r & 1);                      // row 1, 3, 5… → ; row 2, 4, 6… ←
+
+// Block letters drawn as they read on the bracelet: each string is a line across the width (top → bottom).
+const FONTS = {
+  big: {
+    Y: ["##....##",
+        "##....##",
+        ".##..##.",
+        "..####..",
+        "...##...",
+        "...##...",
+        "...##...",
+        "...##..."],
+    S: [".#####.",
+        "##...##",
+        "##.....",
+        ".####..",
+        "...###.",
+        ".....##",
+        "##...##",
+        ".#####."],
+    H: ["##...##",
+        "##...##",
+        "##...##",
+        "#######",
+        "#######",
+        "##...##",
+        "##...##",
+        "##...##"],
+  },
+  small: {
+    Y: ["##..##",
+        "##..##",
+        ".####.",
+        "..##..",
+        "..##..",
+        "..##.."],
+    S: [".####",
+        "##...",
+        ".###.",
+        "...##",
+        "...##",
+        "####."],
+    H: ["##..##",
+        "##..##",
+        "######",
+        "##..##",
+        "##..##",
+        "##..##"],
+  },
+};
+// Shapes, drawn the same way as the letters. `flip` shapes get mirrored on the right-hand end.
+const SHAPES = {
+  heart:     {name: "Heart", bmp: [".##.##.","#######","#######",".#####.","..###..","...#..."]},
+  miniHeart: {name: "Mini heart", bmp: [".#.#.","#####",".###.","..#.."]},
+  tinyHeart: {name: "Tiny heart", bmp: ["#.#","###",".#."]},
+  star:      {name: "Star", bmp: ["...#...","..###..","#######",".#####.","..###..",".##.##.",".#...#."]},
+  sparkle:   {name: "Sparkle", bmp: ["...#...",".#.#.#.","..###..","#######","..###..",".#.#.#.","...#..."]},
+  plus:      {name: "Tiny sparkle", bmp: [".#.","###",".#."]},
+  crown:     {name: "Crown", bmp: ["#..#..#","##.#.##","#######","#######",".#####."]},
+  butterfly: {name: "Butterfly", bmp: [".#.....#.","..#...#..","###.#.###","####.####",".#######.","..##.##..",".###.###.",".##...##."]},
+  smiley:    {name: "Smiley", bmp: [".#####.","#######","##.#.##","#######","#.###.#","##...##",".#####."]},
+  moon:      {name: "Moon", flip: true, bmp: ["..###.",".##...","##....","##....","##....",".##...","..###."]},
+  diamond:   {name: "Diamond", bmp: ["...#...","..###..",".#####.","#######",".#####.","..###..","...#..."]},
+  tinyDiamond:{name: "Tiny diamond", bmp: [".#.","###",".#."]},
+  flower:    {name: "Flower", bmp: [".##.##.","##.#.##","..###..","###.###","..###..","##.#.##",".##.##."]},
+  infinity:  {name: "Infinity", bmp: [".##...##.","#..#.#..#","#...#...#","#..#.#..#",".##...##."]},
+  chevron:   {name: "Arrows", flip: true, bmp: ["##..",".##.","..##",".##.","##.."]},
+  dot:       {name: "Dot", bmp: ["##","##"]},
+  bar:       {name: "Line", bmp: ["#","#","#","#","#","#","#","#"]},
+};
+const ENDS    = ["none","heart","miniHeart","star","sparkle","crown","butterfly","smiley","moon","diamond","flower","infinity","chevron"];
+const BETWEEN = ["none","tinyHeart","miniHeart","dot","plus","tinyDiamond","heart","star"];
+const TRAILS  = ["none","tinyHeart","dot","plus","chevron","bar"];
+
+// ready-made shape combinations
+const IDEAS = [
+  {name: "Hearts everywhere", ends: "heart",     between: "tinyHeart", trail: "tinyHeart"},
+  {name: "Classic heart",     ends: "heart",     between: "none",      trail: "none"},
+  {name: "Sweet & tiny",      ends: "miniHeart", between: "tinyHeart", trail: "dot"},
+  {name: "Royal",             ends: "crown",     between: "dot",       trail: "none"},
+  {name: "Butterfly",         ends: "butterfly", between: "none",      trail: "dot"},
+  {name: "Smile",             ends: "smiley",    between: "none",      trail: "none"},
+  {name: "Starry",            ends: "star",      between: "plus",      trail: "dot"},
+  {name: "Moon & sparkles",   ends: "moon",      between: "plus",      trail: "plus"},
+  {name: "Diamonds",          ends: "diamond",   between: "tinyDiamond", trail: "dot"},
+  {name: "Flower power",      ends: "flower",    between: "dot",       trail: "none"},
+  {name: "Forever",           ends: "infinity",  between: "miniHeart", trail: "none"},
+  {name: "Arrows",            ends: "chevron",   between: "dot",       trail: "chevron"},
+  {name: "Sparkle",           ends: "sparkle",   between: "tinyHeart", trail: "plus"},
+  {name: "Clean & simple",    ends: "none",      between: "tinyHeart", trail: "bar"},
+];
+
+// two colours like the reference bracelets: background + letters (heart usually the letter colour)
+const VARIANTS = [
+  {name: "Pink & White",     bg: "#f2679b", letter: "#ffffff", heart: "#ffffff"},
+  {name: "Sunny Yellow",     bg: "#f6c818", letter: "#ffffff", heart: "#ffffff"},
+  {name: "Purple & White",   bg: "#4a1d6e", letter: "#ffffff", heart: "#ffffff"},
+  {name: "Lime & White",     bg: "#6cae1f", letter: "#ffffff", heart: "#ffffff"},
+  {name: "Turquoise",        bg: "#2cc3e0", letter: "#ffffff", heart: "#ffffff"},
+  {name: "Orange & White",   bg: "#f26a1b", letter: "#ffffff", heart: "#ffffff"},
+  {name: "Royal Blue",       bg: "#2a3fa8", letter: "#ffffff", heart: "#ffffff"},
+  {name: "Navy & Yellow",    bg: "#1d2148", letter: "#f2e21b", heart: "#f2e21b"},
+  {name: "Rose & Black",     bg: "#e889a6", letter: "#1a1a1a", heart: "#1a1a1a"},
+  {name: "Lilac & Purple",   bg: "#c99ad8", letter: "#6a2a8c", heart: "#6a2a8c"},
+  {name: "Mint & Green",     bg: "#45c9a0", letter: "#e9fff5", heart: "#e9fff5"},
+  {name: "Lemon & Green",    bg: "#f3ec2a", letter: "#1f8a3a", heart: "#1f8a3a"},
+  {name: "Aqua & Blue",      bg: "#6fd8de", letter: "#2238a8", heart: "#2238a8"},
+  {name: "White & Red",      bg: "#f7eeee", letter: "#d81e26", heart: "#d81e26"},
+  {name: "Black & White",    bg: "#151515", letter: "#ffffff", heart: "#e3262f"},
+  {name: "Raspberry",        bg: "#d8245a", letter: "#ffe3ec", heart: "#ffe3ec"},
+];
+
+const mirror = bmp => bmp.map(l => [...l].reverse().join(""));
+// Lay out the design along the bracelet: [trail…] end · Y · between · S · between · H · end [trail…]
+function planItems(o, gap){
+  const font = FONTS[o.font], sh = k => SHAPES[k];
+  const mid = [];
+  ["Y", "S", "H"].forEach((ch, i) => {
+    if (i) {
+      if (o.between !== "none") mid.push(gap, {bmp: sh(o.between).bmp, shape: true}, gap);
+      else mid.push(gap);
+    }
+    mid.push({bmp: font[ch]});
+  });
+  const left = [], right = [];
+  if (o.ends !== "none") {
+    const e = sh(o.ends);
+    left.push({bmp: e.flip ? mirror(e.bmp) : e.bmp, shape: true}, 3);
+    right.unshift(3, {bmp: e.bmp, shape: true});
+  }
+  return {left, mid, right};
+}
+const lenOf = items => items.reduce((n, it) => n + (typeof it === "number" ? it : it.bmp[0].length), 0);
+
+function buildGrid(v, o){
+  let plan = planItems(o, o.gap);
+  if (lenOf([...plan.left, ...plan.mid, ...plan.right]) > H) plan = planItems(o, 1);  // squeeze if too long
+  let items = [...plan.left, ...plan.mid, ...plan.right];
+  // fill the leftover space on both sides with a little trail of shapes
+  if (o.trail !== "none") {
+    const t = SHAPES[o.trail], tw = t.bmp[0].length;
+    const side = Math.floor((H - lenOf(items)) / 2) - 1;
+    const n = Math.floor((side) / (tw + 2));
+    for (let i = 0; i < n; i++) {
+      items.unshift({bmp: t.flip ? mirror(t.bmp) : t.bmp, shape: true}, 2);
+      items.push(2, {bmp: t.bmp, shape: true});
+    }
+  }
+  const parts = []; let len = 0;
+  for (const it of items) {
+    if (typeof it === "number") { len += it; continue; }
+    parts.push({bmp: it.bmp, at: len, col: it.shape ? v.heart : v.letter});
+    len += it.bmp[0].length;
+  }
+  const start = Math.max(0, Math.floor((H - len) / 2));
+  const g = Array.from({length: H}, () => Array.from({length: W}, (_, c) => (o.edge && (c === 0 || c === W - 1)) ? v.letter : v.bg));
+  for (const p of parts) {
+    const top = Math.floor((W - p.bmp.length) / 2);
+    p.bmp.forEach((line, i) => [...line].forEach((ch, j) => { const r = start + p.at + j; if (ch === "#" && r < H) g[r][top + i] = p.col; }));
+  }
+  return g;
+}
+
+// ---------- drawing ----------
+function rgb(hex){ const n = parseInt(hex.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; }
+function shade(hex, f){ const c = rgb(hex).map(x => f < 0 ? x * (1 + f) : x + (255 - x) * f); return `rgb(${c.map(Math.round)})`; }
+function luminance(hex){ const [r, g, b] = rgb(hex); return (0.299 * r + 0.587 * g + 0.114 * b) / 255; }
+
+// one alpha knot: two thread loops making a little "V", like the real thing
+function drawKnot(ctx, x, y, s, col){
+  ctx.fillStyle = shade(col, -0.45); ctx.fillRect(x, y, s, s);
+  for (const side of [-1, 1]) {
+    ctx.save();
+    ctx.translate(x + s / 2 + side * s * 0.22, y + s / 2);
+    ctx.rotate(side * 0.42);
+    const gr = ctx.createLinearGradient(-s * 0.25, 0, s * 0.25, 0);
+    gr.addColorStop(0, shade(col, -0.12)); gr.addColorStop(0.45, shade(col, 0.22)); gr.addColorStop(1, shade(col, -0.2));
+    ctx.fillStyle = gr;
+    ctx.beginPath(); ctx.ellipse(0, 0, s * 0.26, s * 0.56, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+}
+// realistic horizontal bracelet: row 1 on the left, letters upright
+function drawBracelet(cv, grid, v, s){
+  const tail = s * 7, w = H * s + tail * 2, h = W * s + s * 4;
+  cv.width = w; cv.height = h;
+  const ctx = cv.getContext("2d");
+  ctx.fillStyle = "#ebe7e1"; ctx.fillRect(0, 0, w, h);
+  const y0 = s * 2, mid = y0 + W * s / 2;
+  // thread tails
+  ctx.lineCap = "round";
+  for (const end of [0, 1]) {
+    const x0 = end ? tail + H * s - 2 : tail + 2, dir = end ? 1 : -1;
+    for (let i = 0; i < W; i++) {
+      const sy = y0 + (i + 0.5) * s, ty = mid + (i - W / 2) * s * 0.35 + Math.sin(i * 1.7) * s * 0.4;
+      ctx.strokeStyle = i % 3 ? shade(v.bg, -0.1) : shade(v.letter, -0.08);
+      ctx.lineWidth = s * 0.5;
+      ctx.beginPath(); ctx.moveTo(x0, sy);
+      ctx.quadraticCurveTo(x0 + dir * tail * 0.35, mid, x0 + dir * (tail - s * 0.6), ty); ctx.stroke();
+    }
+    ctx.fillStyle = shade(v.bg, -0.3);
+    ctx.beginPath(); ctx.ellipse(x0 + dir * tail * 0.32, mid, s * 0.7, s * 1.3, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  // body
+  ctx.save();
+  ctx.shadowColor = "#0004"; ctx.shadowBlur = s; ctx.shadowOffsetY = s * 0.3;
+  ctx.fillStyle = shade(v.bg, -0.4);
+  ctx.beginPath(); ctx.roundRect(tail, y0, H * s, W * s, s * 1.2); ctx.fill();
+  ctx.restore();
+  ctx.save();
+  ctx.beginPath(); ctx.roundRect(tail, y0, H * s, W * s, s * 1.2); ctx.clip();
+  for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) drawKnot(ctx, tail + r * s, y0 + c * s, s, grid[r][c]);
+  ctx.restore();
+}
+
+const CX = 28, CY = 24, PADX = 34, PADY = 16;
+function drawArrow(ctx, x, y, dir, color){
+  const L = CX * 0.26;
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.moveTo(x - dir * L, y); ctx.lineTo(x + dir * (L - 3), y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x + dir * L, y); ctx.lineTo(x + dir * (L - 5), y - 4); ctx.lineTo(x + dir * (L - 5), y + 4); ctx.closePath(); ctx.fill();
+}
+function drawChart(cv, grid, {scale = 1, arrows = true, current = -1} = {}){
+  const w = (W * CX + PADX * 2) * scale, h = (H * CY + PADY * 2) * scale;
+  cv.width = w; cv.height = h;
+  const ctx = cv.getContext("2d");
+  ctx.scale(scale, scale);
+  ctx.fillStyle = "#15151a"; ctx.fillRect(0, 0, w, h);
+  ctx.font = "10px system-ui"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  for (let r = 0; r < H; r++) {
+    const y = PADY + r * CY;
+    ctx.fillStyle = r === current ? "#ff6a3d" : "#777";
+    if ((r + 1) % 5 === 0 || r === 0 || r === current) {
+      ctx.fillText(r + 1, PADX / 2, y + CY / 2); ctx.fillText(r + 1, PADX + W * CX + PADX / 2, y + CY / 2);
+    }
+    for (let c = 0; c < W; c++) {
+      const x = PADX + c * CX, col = grid[r][c];
+      ctx.fillStyle = col; ctx.fillRect(x + 1, y + 1, CX - 2, CY - 2);
+      if (arrows) drawArrow(ctx, x + CX / 2, y + CY / 2, forward(r) ? 1 : -1, luminance(col) > 0.55 ? "#0009" : "#fffb");
+    }
+    if (r === current) { ctx.strokeStyle = "#ff6a3d"; ctx.lineWidth = 3; ctx.strokeRect(PADX - 2, y - 1, W * CX + 4, CY + 2); }
+  }
+}
+function pickCell(cv, ev){
+  const rect = cv.getBoundingClientRect();
+  const px = (ev.clientX - rect.left) * (cv.width / rect.width);
+  const py = (ev.clientY - rect.top) * (cv.height / rect.height);
+  const r = Math.floor((py - PADY) / CY), c = Math.floor((px - PADX) / CX);
+  return (r >= 0 && r < H && c >= 0 && c < W) ? [r, c] : null;
+}
+
+// ---------- app ----------
+const $ = id => document.getElementById(id);
+const state = {v: 0, grid: null, paint: null, row: 0, done: new Set()};
+const opt = () => ({ends: $("ends").value, between: $("between").value, trail: $("trail").value,
+                    font: $("font").value, gap: +$("gap").value, edge: $("edge").checked});
+
+const fill = (id, keys) => keys.forEach(k => $(id).add(new Option(k === "none" ? "None" : SHAPES[k].name, k)));
+fill("ends", ENDS); fill("between", BETWEEN); fill("trail", TRAILS);
+function applyIdea(idea){ for (const k of ["ends", "between", "trail"]) $(k).value = idea[k]; }
+applyIdea(IDEAS[0]);
+
+function rebuild(){ state.grid = buildGrid(VARIANTS[state.v], opt()); renderAll(); renderGallery(); renderIdeas(); }
+function renderIdeas(){
+  const box = $("ideas"), o = opt(), v = VARIANTS[state.v];
+  box.innerHTML = "";
+  IDEAS.forEach(idea => {
+    const d = document.createElement("div");
+    const on = ["ends", "between", "trail"].every(k => idea[k] === o[k]);
+    d.className = "thumb" + (on ? " on" : "");
+    const cv = document.createElement("canvas");
+    drawBracelet(cv, buildGrid(v, {...o, ...idea}), v, 6);
+    d.append(cv);
+    d.insertAdjacentHTML("beforeend", `<b>${idea.name}</b>`);
+    d.onclick = () => { applyIdea(idea); rebuild(); };
+    box.append(d);
+  });
+}
+function redrawChart(){ drawChart($("chart"), state.grid, {arrows: $("arrows").checked, current: state.row}); $("chart").style.width = (W * CX + PADX * 2) + "px"; }
+function renderAll(){
+  redrawChart();
+  drawBracelet($("strip"), state.grid, VARIANTS[state.v], 18);
+  $("dims").textContent = `· ${W} wide × ${H} rows · ${VARIANTS[state.v].name}`;
+  renderPaint(); renderCounts(); renderSteps();
+}
+function colorsOf(grid){ const m = new Map(); grid.flat().forEach(c => m.set(c, (m.get(c) || 0) + 1)); return [...m.entries()].sort((a, b) => b[1] - a[1]); }
+function renderPaint(){
+  const cols = colorsOf(state.grid).map(([c]) => c);
+  if (state.paint && !cols.includes(state.paint)) cols.push(state.paint);
+  if (!state.paint) state.paint = cols[0];
+  $("paint").innerHTML = cols.map(c => `<span class="sw ${c === state.paint ? "on" : ""}" data-c="${c}"><i style="background:${c}"></i>${c}</span>`).join("");
+}
+function renderCounts(){
+  $("counts").innerHTML = colorsOf(state.grid).map(([c, n]) => `<span class="sw"><i style="background:${c}"></i>${n}</span>`).join("");
+}
+function rowRuns(r){
+  const cells = forward(r) ? state.grid[r] : [...state.grid[r]].reverse();
+  const runs = [];
+  for (const c of cells) { const last = runs[runs.length - 1]; if (last && last[0] === c) last[1]++; else runs.push([c, 1]); }
+  return runs;
+}
+function renderSteps(){
+  $("steps").innerHTML = state.grid.map((_, r) => {
+    const runs = rowRuns(r).map(([c, n]) => `<span class="run">${n}×<i style="background:${c}"></i></span>`).join("");
+    return `<div class="step ${r === state.row ? "cur" : ""} ${state.done.has(r) ? "done" : ""}" data-r="${r}">
+      <span class="rn">Row ${r + 1}</span><span class="dir">${forward(r) ? "→" : "←"}</span><span>${runs}</span></div>`;
+  }).join("");
+  $("curLabel").textContent = `Row ${state.row + 1} of ${H} · ${forward(state.row) ? "→ forward knots, left to right" : "← backward knots, right to left"}`;
+}
+function goRow(r, scroll = true){
+  state.row = Math.max(0, Math.min(H - 1, r));
+  redrawChart(); renderSteps();
+  if (scroll) {
+    $("steps").querySelector(".cur")?.scrollIntoView({block: "nearest"});
+    const wrap = $("chartWrap");
+    wrap.scrollTop = PADY + state.row * CY - wrap.clientHeight / 2;
+  }
+}
+function renderGallery(){
+  const gal = $("gallery"), o = opt();
+  gal.innerHTML = "";
+  VARIANTS.forEach((v, i) => {
+    const d = document.createElement("div");
+    d.className = "thumb" + (i === state.v ? " on" : "");
+    const cv = document.createElement("canvas");
+    drawBracelet(cv, buildGrid(v, o), v, 6);
+    d.append(cv);
+    d.insertAdjacentHTML("beforeend", `<b>${v.name}</b>`);
+    d.onclick = () => { state.v = i; state.paint = null; rebuild(); };
+    gal.append(d);
+  });
+}
+
+$("paint").onclick = e => { const s = e.target.closest(".sw"); if (s) { state.paint = s.dataset.c; renderPaint(); } };
+$("custom").oninput = e => { state.paint = e.target.value; renderPaint(); };
+for (const id of ["ends", "between", "trail", "font", "gap", "edge"]) $(id).onchange = rebuild;
+const pick = a => a[Math.floor(Math.random() * a.length)];
+$("surprise").onclick = () => {
+  applyIdea({ends: pick(ENDS.slice(1)), between: pick(BETWEEN.slice(0, 6)), trail: pick(TRAILS)});
+  state.v = Math.floor(Math.random() * VARIANTS.length); state.paint = null;
+  rebuild();
+};
+$("arrows").onchange = redrawChart;
+$("reset").onclick = rebuild;
+$("steps").onclick = e => { const s = e.target.closest(".step"); if (s) goRow(+s.dataset.r, false); };
+$("next").onclick = () => { state.done.add(state.row); goRow(state.row + 1); };
+$("prev").onclick = () => { state.done.delete(state.row - 1); goRow(state.row - 1); };
+
+let painting = false;
+const paintAt = ev => { const p = pickCell($("chart"), ev); if (!p) return; const [r, c] = p;
+  if (state.grid[r][c] !== state.paint) { state.grid[r][c] = state.paint; redrawChart(); drawBracelet($("strip"), state.grid, VARIANTS[state.v], 18); renderCounts(); renderSteps(); } };
+$("chart").addEventListener("pointerdown", e => { if (e.button === 2) return; painting = true; paintAt(e); });
+$("chart").addEventListener("pointermove", e => painting && paintAt(e));
+addEventListener("pointerup", () => { if (painting) renderPaint(); painting = false; });
+$("chart").addEventListener("contextmenu", e => { e.preventDefault(); const p = pickCell($("chart"), e); if (p) { state.paint = state.grid[p[0]][p[1]]; renderPaint(); } });
+
+$("png").onclick = () => {
+  const out = document.createElement("canvas");
+  drawChart(out, state.grid, {scale: 2, arrows: $("arrows").checked});
+  const a = document.createElement("a");
+  a.download = `YSH-alpha-${VARIANTS[state.v].name.replace(/\W+/g, "-")}.png`;
+  a.href = out.toDataURL("image/png"); a.click();
+};
+
+rebuild();
+</script>
+</body>
+</html>
