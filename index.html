@@ -218,8 +218,11 @@ const FONTS = {
 };
 // Shapes, drawn the same way as the letters. `flip` shapes get mirrored on the right-hand end.
 const SHAPES = {
-  heart:     {name: "Heart", bmp: [".##.##.","#######","#######",".#####.","..###..","...#..."]},
-  miniHeart: {name: "Mini heart", bmp: [".#.#.","#####",".###.","..#.."]},
+  // chunky hearts lying sideways along the bracelet; at the ends the point faces the name
+  heart:     {name: "Heart", flip: true, bmp: ["...##.","..####",".#####","#####.",".#####","..####","...##."]},
+  miniHeart: {name: "Mini heart", flip: true, bmp: ["..#.","..##",".###","###.",".###","..##","..#."]},
+  heartUp:   {name: "Heart (upright)", bmp: [".##.##.","#######","#######",".#####.","..###..","...#..."]},
+  miniHeartUp:{name: "Mini heart (upright)", bmp: [".#.#.","#####",".###.","..#.."]},
   tinyHeart: {name: "Tiny heart", bmp: ["#.#","###",".#."]},
   star:      {name: "Star", bmp: ["...#...","..###..","#######",".#####.","..###..",".##.##.",".#...#."]},
   sparkle:   {name: "Sparkle", bmp: ["...#...",".#.#.#.","..###..","#######","..###..",".#.#.#.","...#..."]},
@@ -256,9 +259,9 @@ const SHAPES = {
   tinyX:     {name: "Tiny cross", bmp: ["#.#",".#.","#.#"]},
   zigzag:    {name: "Zigzag", bmp: ["#.","#.",".#",".#","#.","#.",".#",".#"]},
 };
-const ENDS    = ["none","heart","miniHeart","star","sparkle","crown","butterfly","smiley","moon","diamond","flower","infinity","chevron",
+const ENDS    = ["none","heart","miniHeart","heartUp","miniHeartUp","star","sparkle","crown","butterfly","smiley","moon","diamond","flower","infinity","chevron",
                  "cat","paw","note","sun","cloud","bolt","anchor","bow","ghost","pumpkin","eye","hilal","tulip","icecream","rainbow","fish","key","leaf"];
-const BETWEEN = ["none","tinyHeart","miniHeart","dot","plus","tinyDiamond","tinyX","heart","star"];
+const BETWEEN = ["none","tinyHeart","miniHeart","dot","plus","tinyDiamond","tinyX","heart","miniHeartUp","star"];
 const TRAILS  = ["none","tinyHeart","dot","plus","tinyX","chevron","zigzag","bar"];
 
 // ready-made shape combinations
@@ -312,6 +315,8 @@ const VARIANTS = [
   {name: "Aqua & Blue",      bg: "#6fd8de", letter: "#2238a8", heart: "#2238a8"},
   {name: "White & Red",      bg: "#f7eeee", letter: "#d81e26", heart: "#d81e26"},
   {name: "Black & White",    bg: "#151515", letter: "#ffffff", heart: "#e3262f"},
+  {name: "Black & Cream",    bg: "#141414", letter: "#f3eee3", heart: "#f3eee3"},
+  {name: "Cream & Black",    bg: "#f3eee3", letter: "#141414", heart: "#141414"},
   {name: "Raspberry",        bg: "#d8245a", letter: "#ffe3ec", heart: "#ffe3ec"},
 ];
 
