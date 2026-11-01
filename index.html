@@ -98,9 +98,15 @@ body.editing #lockBadge{display:inline-block}
       <label>Right end <select id="endsR"><option value="same">Same as left</option></select></label>
       <label>Between letters <select id="between"></select></label>
       <label>Extra trail <select id="trail"></select></label>
+      <label>Background extras <select id="deco"></select></label>
       <label>Letters <select id="font">
-        <option value="big" selected>Bold (8 knots tall)</option>
-        <option value="small">Small (6 knots tall)</option>
+        <option value="big" selected>Bold</option>
+        <option value="heavy">Heavy</option>
+        <option value="serif">Serif (classic)</option>
+        <option value="tall">Tall</option>
+        <option value="thin">Thin</option>
+        <option value="lower">lowercase (ysh)</option>
+        <option value="small">Small</option>
       </select></label>
       <label>Letter gap <select id="gap">
         <option value="1">1 knot</option>
@@ -215,6 +221,50 @@ const FONTS = {
         "##..##",
         "##..##"],
   },
+  heavy: {
+    Y: ["###...###","###...###",".###.###.","..#####..","...###...","...###...","...###...","...###..."],
+    S: [".######.","###..###","###.....",".######.",".....###",".....###","###..###",".######."],
+    H: ["###...###","###...###","###...###","#########","#########","###...###","###...###","###...###"],
+  },
+  serif: {
+    Y: ["###..###",".##..##.",".##..##.","..####..","...##...","...##...","...##...","..####.."],
+    S: [".####.#","##..###","##.....",".####..","....##.",".....##","###..##","#.####."],
+    H: ["####.####",".##...##.",".##...##.",".#######.",".##...##.",".##...##.",".##...##.","####.####"],
+  },
+  tall: {
+    Y: ["##..##","##..##","##..##",".####.","..##..","..##..","..##..","..##..","..##..","..##.."],
+    S: [".####.","##..##","##....",".##...","..##..","...##.","....##","....##","##..##",".####."],
+    H: ["##..##","##..##","##..##","##..##","######","######","##..##","##..##","##..##","##..##"],
+  },
+  thin: {
+    Y: ["#...#","#...#",".#.#.","..#..","..#..","..#..","..#.."],
+    S: [".####","#....","#....",".###.","....#","....#","####."],
+    H: ["#...#","#...#","#...#","#####","#...#","#...#","#...#"],
+  },
+  lower: {   // y s h — all 10 rows so they share one baseline
+    Y: ["......","......","......","##..##","##..##","##..##",".#####","....##","##..##",".####."],
+    S: [".....",".....",".....",".####","##...",".###.","...##","####.",".....","....."],
+    H: ["##....","##....","##....","#####.","##..##","##..##","##..##","##..##","......","......"],
+  },
+};
+// Background decorations, scattered into the empty space with a 1-knot gap.
+// '#' = accent colour, 'o' = letter colour (stems).
+const DECO = {
+  bigStar: ["...#...","...#...","..###..","#######","..###..","...#...","...#..."],
+  star:    ["..#..","..#..","#####","..#..","..#.."],
+  twinkle: [".#.","###",".#."],
+  dot:     ["#"],
+  sprig:   ["..#..",".#o#.","#.o.#","##o##","..o..",".#o#.","..o.."],
+  leafy:   ["#...#","##.##",".#o#.","..o..","#.o..","##o..","..o.."],
+  bud:     [".#.","#o#",".o.",".o."],
+  mushroom:[".###.","#####","..o..","..o.."],
+};
+const DECO_SETS = {
+  none:   {name: "None"},
+  stars:  {name: "Stars & twinkles", sky: [["bigStar", 2], ["star", 3], ["twinkle", 5], ["dot", 7]]},
+  night:  {name: "Night sky (tiny stars)", sky: [["twinkle", 6], ["dot", 14]]},
+  garden: {name: "Garden (plants + stars)", edge: ["sprig", "mushroom", "leafy", "bud"], sky: [["star", 2], ["twinkle", 3], ["dot", 5]]},
+  dots:   {name: "Dots", sky: [["dot", 18]]},
 };
 // Shapes, drawn the same way as the letters. `flip` shapes get mirrored on the right-hand end.
 const SHAPES = {
@@ -266,6 +316,13 @@ const TRAILS  = ["none","tinyHeart","dot","plus","tinyX","chevron","zigzag","bar
 
 // ready-made shape combinations
 const IDEAS = [
+  {name: "Starry night",      ends: "heart",     between: "tinyHeart", trail: "none", deco: "stars",  palette: "Night & Gold"},
+  {name: "Night garden",      ends: "none",      between: "dot",       trail: "none", deco: "garden", palette: "Night & Gold"},
+  {name: "Kitty at night",    ends: "cat",       between: "tinyHeart", trail: "none", deco: "stars",  palette: "Night & Gold"},
+  {name: "Moonlight",         ends: "moon",      endsR: "star", between: "plus", trail: "none", deco: "night", palette: "Navy Night"},
+  {name: "Classic stars",     ends: "none",      between: "plus",      trail: "none", deco: "stars",  palette: "Plum Night", font: "serif"},
+  {name: "Forest garden",     ends: "leaf",      between: "dot",       trail: "none", deco: "garden", palette: "Forest Night", font: "tall"},
+  {name: "Golden lowercase",  ends: "miniHeart", between: "none",      trail: "none", deco: "stars",  palette: "Cream & Gold", font: "lower"},
   {name: "Hearts everywhere", ends: "heart",     between: "tinyHeart", trail: "tinyHeart"},
   {name: "Classic heart",     ends: "heart",     between: "none",      trail: "none"},
   {name: "Sweet & tiny",      ends: "miniHeart", between: "tinyHeart", trail: "dot"},
@@ -317,6 +374,12 @@ const VARIANTS = [
   {name: "Black & White",    bg: "#151515", letter: "#ffffff", heart: "#e3262f"},
   {name: "Black & Cream",    bg: "#141414", letter: "#f3eee3", heart: "#f3eee3"},
   {name: "Cream & Black",    bg: "#f3eee3", letter: "#141414", heart: "#141414"},
+  // three colours: letters + gold accent for hearts, stars and plants (like the cat bracelets)
+  {name: "Night & Gold",     bg: "#1c1b19", letter: "#f1e9d6", heart: "#d9a441", accent: "#d9a441"},
+  {name: "Navy Night",       bg: "#16203e", letter: "#f1e9d6", heart: "#e9b949", accent: "#e9b949"},
+  {name: "Forest Night",     bg: "#1e2a21", letter: "#efe6d0", heart: "#d9a441", accent: "#d9a441"},
+  {name: "Plum Night",       bg: "#2a1736", letter: "#f6e7f0", heart: "#f2b84b", accent: "#f2b84b"},
+  {name: "Cream & Gold",     bg: "#efe7d6", letter: "#1c1b19", heart: "#c98f2c", accent: "#c98f2c"},
   {name: "Raspberry",        bg: "#d8245a", letter: "#ffe3ec", heart: "#ffe3ec"},
 ];
 
@@ -365,11 +428,57 @@ function buildGrid(v, o){
   }
   const start = Math.max(0, Math.floor((H - len) / 2));
   const g = Array.from({length: H}, () => Array.from({length: W}, (_, c) => (o.edge && (c === 0 || c === W - 1)) ? v.letter : v.bg));
+  const occ = Array.from({length: H}, () => new Array(W).fill(false));
   for (const p of parts) {
     const top = Math.floor((W - p.bmp.length) / 2);
-    p.bmp.forEach((line, i) => [...line].forEach((ch, j) => { const r = start + p.at + j; if (ch === "#" && r < H) g[r][top + i] = p.col; }));
+    p.bmp.forEach((line, i) => [...line].forEach((ch, j) => { const r = start + p.at + j; if (ch === "#" && r < H) { g[r][top + i] = p.col; occ[r][top + i] = true; } }));
   }
+  if (o.deco && o.deco !== "none") decorate(g, occ, v, o);
   return g;
+}
+
+const hash2 = (r, c) => { let h = Math.imul(r * 374761393 + c * 668265263, 1274126177); h ^= h >>> 13; return (Math.imul(h, 1103515245) >>> 0); };
+function decorate(g, occ, v, o){
+  const set = DECO_SETS[o.deco], acc = v.accent || v.heart;
+  const lo = o.edge ? 1 : 0, hi = o.edge ? W - 2 : W - 1;
+  const cells = bmp => bmp.flatMap((line, i) => [...line].map((ch, j) => [i, j, ch]).filter(x => x[2] !== "."));
+  const fits = (bmp, r0, c0) => cells(bmp).every(([i, j]) => {
+    const r = r0 + j, c = c0 + i;
+    if (r < 0 || r >= H || c < lo || c > hi) return false;
+    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+      const rr = r + dr, cc = c + dc;
+      if (rr >= 0 && rr < H && cc >= 0 && cc < W && occ[rr][cc]) return false;
+    }
+    return true;
+  });
+  const put = (bmp, r0, c0) => cells(bmp).forEach(([i, j, ch]) => { g[r0 + j][c0 + i] = ch === "o" ? v.letter : acc; occ[r0 + j][c0 + i] = true; });
+  // plants grow from the bottom edge (some hang from the top), walking along the bracelet
+  if (set.edge) {
+    let k = 0;
+    for (let r0 = 1; r0 < H - 2; r0++) {
+      const name = set.edge[k % set.edge.length], fromTop = name !== "mushroom" && k % 3 === 2;
+      const bmp = fromTop ? [...DECO[name]].reverse() : DECO[name];
+      const c0 = fromTop ? lo : hi - bmp.length + 1;
+      if (fits(bmp, r0, c0)) { put(bmp, r0, c0); r0 += bmp[0].length + 1; k++; }
+    }
+  }
+  // stars keep 2 knots away from letters and shapes so the name stays clean
+  const halo = occ.map(row => row.slice());
+  for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) if (occ[r][c])
+    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) if (r + dr >= 0 && r + dr < H && c + dc >= 0 && c + dc < W) halo[r + dr][c + dc] = true;
+  for (let r = 0; r < H; r++) occ[r] = halo[r];
+  // stars and dots in whatever space is left, biggest first, in a fixed "random" order
+  const spots = [];
+  for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) spots.push([hash2(r, c), r, c]);
+  spots.sort((a, b) => a[0] - b[0]);
+  for (const [name, max] of set.sky || []) {
+    const bmp = DECO[name], half = Math.floor(bmp.length / 2), halfW = Math.floor(bmp[0].length / 2);
+    let n = 0;
+    for (const [, r, c] of spots) {
+      if (n >= max) break;
+      if (fits(bmp, r - halfW, c - half)) { put(bmp, r - halfW, c - half); n++; }
+    }
+  }
 }
 
 // ---------- drawing ----------
@@ -474,12 +583,18 @@ if (!CanvasRenderingContext2D.prototype.roundRect)       // older phones
 const $ = id => document.getElementById(id);
 const state = {v: 0, grid: null, paint: null, row: 0, done: new Set()};
 const opt = () => ({ends: $("ends").value, endsR: $("endsR").value, between: $("between").value, trail: $("trail").value,
-                    font: $("font").value, gap: +$("gap").value, edge: $("edge").checked});
+                    deco: $("deco").value, font: $("font").value, gap: +$("gap").value, edge: $("edge").checked});
 
 const fill = (id, keys) => keys.forEach(k => $(id).add(new Option(k === "none" ? "None" : SHAPES[k].name, k)));
 fill("ends", ENDS); fill("endsR", ENDS); fill("between", BETWEEN); fill("trail", TRAILS);
+for (const [k, d] of Object.entries(DECO_SETS)) $("deco").add(new Option(d.name, k));
 const IDEA_KEYS = ["ends", "endsR", "between", "trail"];
-function applyIdea(idea){ for (const k of IDEA_KEYS) $(k).value = idea[k] || "same"; }
+function applyIdea(idea){
+  for (const k of IDEA_KEYS) $(k).value = idea[k] || (k === "endsR" ? "same" : "none");
+  if (idea.deco) $("deco").value = idea.deco;
+  if (idea.font) $("font").value = idea.font;
+  if (idea.palette) { state.v = VARIANTS.findIndex(v => v.name === idea.palette); state.paint = null; }
+}
 applyIdea(IDEAS[0]);
 
 function rebuild(){ state.grid = buildGrid(VARIANTS[state.v], opt()); undoStack.length = 0; $("undo").disabled = true; renderAll(); renderGallery(); renderIdeas(); }
@@ -492,7 +607,8 @@ function renderIdeas(){
     const on = IDEA_KEYS.every(k => full[k] === o[k]);
     d.className = "thumb" + (on ? " on" : "");
     const cv = document.createElement("canvas");
-    drawBracelet(cv, buildGrid(v, {...o, ...full}), v, 6);
+    const iv = idea.palette ? VARIANTS.find(x => x.name === idea.palette) : v;
+    drawBracelet(cv, buildGrid(iv, {...o, ...full}), iv, 6);
     d.append(cv);
     d.insertAdjacentHTML("beforeend", `<b>${idea.name}</b>`);
     d.onclick = () => { applyIdea(idea); rebuild(); };
@@ -564,12 +680,14 @@ function renderGallery(){
 
 $("paint").onclick = e => { const s = e.target.closest(".sw"); if (s) { state.paint = s.dataset.c; renderPaint(); } };
 $("custom").oninput = e => { state.paint = e.target.value; renderPaint(); };
-for (const id of ["ends", "endsR", "between", "trail", "font", "gap", "edge"]) $(id).onchange = rebuild;
+for (const id of ["ends", "endsR", "between", "trail", "deco", "font", "gap", "edge"]) $(id).onchange = rebuild;
 const pick = a => a[Math.floor(Math.random() * a.length)];
 $("surprise").onclick = () => {
+  state.v = Math.floor(Math.random() * VARIANTS.length);
   applyIdea({ends: pick(ENDS.slice(1)), endsR: Math.random() < 0.3 ? pick(ENDS.slice(1)) : "same",
-             between: pick(BETWEEN.slice(0, 7)), trail: pick(TRAILS)});
-  state.v = Math.floor(Math.random() * VARIANTS.length); state.paint = null;
+             between: pick(BETWEEN.slice(0, 7)), trail: Math.random() < 0.5 ? "none" : pick(TRAILS),
+             deco: pick(Object.keys(DECO_SETS)), font: pick([...$("font").options].map(x => x.value))});
+  state.paint = null;
   rebuild();
 };
 $("arrows").onchange = redrawChart;
