@@ -261,10 +261,11 @@ const DECO = {
 };
 const DECO_SETS = {
   none:   {name: "None"},
-  stars:  {name: "Stars & twinkles", sky: [["bigStar", 2], ["star", 3], ["twinkle", 5], ["dot", 7]]},
-  night:  {name: "Night sky (tiny stars)", sky: [["twinkle", 6], ["dot", 14]]},
-  garden: {name: "Garden (plants + stars)", edge: ["sprig", "mushroom", "leafy", "bud"], sky: [["star", 2], ["twinkle", 3], ["dot", 5]]},
-  dots:   {name: "Dots", sky: [["dot", 18]]},
+  // sky counts are per side; every star is mirrored onto the other half
+  stars:  {name: "Stars & twinkles", sky: [["star", 1], ["twinkle", 2], ["dot", 2]]},
+  night:  {name: "Night sky (tiny stars)", sky: [["twinkle", 2], ["dot", 3]]},
+  garden: {name: "Garden (plants + stars)", edge: ["sprig", "mushroom", "leafy", "bud"], sky: [["twinkle", 1], ["dot", 1]]},
+  dots:   {name: "Dots", sky: [["dot", 5]]},
 };
 // Shapes, drawn the same way as the letters. `flip` shapes get mirrored on the right-hand end.
 const SHAPES = {
@@ -455,11 +456,13 @@ function decorate(g, occ, v, o){
   // plants grow from the bottom edge (some hang from the top), walking along the bracelet
   if (set.edge) {
     let k = 0;
-    for (let r0 = 1; r0 < H - 2; r0++) {
-      const name = set.edge[k % set.edge.length], fromTop = name !== "mushroom" && k % 3 === 2;
-      const bmp = fromTop ? [...DECO[name]].reverse() : DECO[name];
-      const c0 = fromTop ? lo : hi - bmp.length + 1;
-      if (fits(bmp, r0, c0)) { put(bmp, r0, c0); r0 += bmp[0].length + 1; k++; }
+    for (let r0 = 1; r0 + 6 <= Math.floor(H / 2); r0++) {
+      const bmp = DECO[set.edge[k % set.edge.length]], bw = bmp[0].length;
+      const c0 = hi - bmp.length + 1, m0 = H - bw - r0;
+      if (r0 + bw <= Math.floor(H / 2) && fits(bmp, r0, c0) && fits(mirror(bmp), m0, c0)) {
+        put(bmp, r0, c0); put(mirror(bmp), m0, c0);
+        r0 += bw + 1; k++;
+      }
     }
   }
   // stars keep 2 knots away from letters and shapes so the name stays clean
@@ -471,12 +474,20 @@ function decorate(g, occ, v, o){
   const spots = [];
   for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) spots.push([hash2(r, c), r, c]);
   spots.sort((a, b) => a[0] - b[0]);
+  // keep stars off the very edge so none look cut off
+  const inside = (bmp, c0) => c0 >= lo + 1 && c0 + bmp.length - 1 <= hi - 1;
   for (const [name, max] of set.sky || []) {
-    const bmp = DECO[name], half = Math.floor(bmp.length / 2), halfW = Math.floor(bmp[0].length / 2);
+    const bmp = DECO[name], half = Math.floor(bmp.length / 2), halfW = Math.floor(bmp[0].length / 2), bw = bmp[0].length;
     let n = 0;
     for (const [, r, c] of spots) {
       if (n >= max) break;
-      if (fits(bmp, r - halfW, c - half)) { put(bmp, r - halfW, c - half); n++; }
+      const r0 = r - halfW, c0 = c - half, m0 = H - bw - r0;    // m0 = mirrored start on the other half
+      if (r0 + bw > Math.floor(H / 2) || !inside(bmp, c0)) continue;
+      if (fits(bmp, r0, c0)) {
+        put(bmp, r0, c0);
+        if (fits(bmp, m0, c0)) put(bmp, m0, c0);
+        n++;
+      }
     }
   }
 }
