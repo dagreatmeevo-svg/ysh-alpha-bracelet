@@ -153,7 +153,7 @@ summary{cursor:pointer;font-weight:650;padding:3px 0}summary span{font-size:12px
       <div id="chartWrap"><canvas id="chart" role="img" aria-label="Tying chart. Row 1 at top. Use the accessible row list to select rows."></canvas></div>
       <div id="steps"></div>
     </div>
-    <div class="note">This corrected chart replaces the old mirrored chart. If you already started the old pattern, do not switch charts halfway through. Row 1 is the start of a new bracelet. Tap a row on the chart or in the list to jump to it. Each row lists its colours in the order you tie them, following the arrow. The letters lie on their side in the chart and read upright on the finished bracelet.</div>
+    <div class="note">This corrected chart replaces the old mirrored chart. If you already started the old pattern, do not switch charts halfway through. Row 1 is the start of a new bracelet. Tap a row on the chart or in the list to jump to it. Completed rows disappear from the chart and row list as you advance. Tap Prev or jump back to reveal them again. Each row lists its colours in the order you tie them, following the arrow. The letters lie on their side in the chart and read upright on the finished bracelet.</div>
     <div class="exports">
       <button id="pdf" class="primary">⬇ Download PDF (preview + tying chart)</button>
       <button id="png">Chart PNG</button>
@@ -567,16 +567,16 @@ function drawArrow(ctx, x, y, dir, color, L){
   ctx.beginPath(); ctx.moveTo(x - dir * L, y); ctx.lineTo(x + dir * (L - head * 0.6), y); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(x + dir * L, y); ctx.lineTo(x + dir * (L - head), y - head * 0.7); ctx.lineTo(x + dir * (L - head), y + head * 0.7); ctx.closePath(); ctx.fill();
 }
-function drawChart(cv, grid, {scale = 1, arrows = true, current = -1, g = geom} = {}){
+function drawChart(cv, grid, {scale = 1, arrows = true, current = -1, g = geom, rows = Array.from({length: H}, (_, r) => r)} = {}){
   const {cx, cy, padx, pady} = g;
-  const cssW = W * cx + padx * 2, cssH = H * cy + pady * 2;
+  const cssW = W * cx + padx * 2, cssH = rows.length * cy + pady * 2;
   cv.width = Math.round(cssW * scale); cv.height = Math.round(cssH * scale);
   const ctx = cv.getContext("2d");
   ctx.scale(scale, scale);
   ctx.fillStyle = "#15151a"; ctx.fillRect(0, 0, cssW, cssH);
   ctx.font = `${Math.max(9, cy * 0.45)}px system-ui`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  for (let r = 0; r < H; r++) {
-    const y = pady + r * cy;
+  for (const [visibleIndex, r] of rows.entries()) {
+    const y = pady + visibleIndex * cy;
     if (r === current) { ctx.fillStyle = "#ff6a3d"; ctx.fillRect(padx - 4, y - 2, W * cx + 8, cy + 4); }
     ctx.fillStyle = r === current ? "#ff6a3d" : "#888";
     if ((r + 1) % 5 === 0 || r === 0 || r === current) {
@@ -594,7 +594,7 @@ function drawChart(cv, grid, {scale = 1, arrows = true, current = -1, g = geom} 
 function pickCell(cv, ev){
   const rect = cv.getBoundingClientRect();
   const px = ev.clientX - rect.left, py = ev.clientY - rect.top;
-  const r = Math.floor((py - geom.pady) / geom.cy), c = Math.floor((px - geom.padx) / geom.cx);
+  const r = visibleRows()[Math.floor((py - geom.pady) / geom.cy)], c = Math.floor((px - geom.padx) / geom.cx);
   return (r >= 0 && r < H && c >= 0 && c < W) ? [r, c] : null;
 }
 if (!CanvasRenderingContext2D.prototype.roundRect)       // older phones
@@ -642,12 +642,16 @@ function renderIdeas(){
     box.append(d);
   });
 }
+// Keep original row numbers and knot directions when completed rows collapse.
+function visibleRows(){
+  return Array.from({length: H}, (_, r) => r).filter(r => unlocked || r >= state.row || !state.done.has(r));
+}
 function redrawChart(){
   fitChart();
   const cv = $("chart");
-  drawChart(cv, state.grid, {arrows: $("arrows").checked, current: state.row, scale: Math.min(3, devicePixelRatio || 1)});
+  drawChart(cv, state.grid, {arrows: $("arrows").checked, current: state.row, rows: visibleRows(), scale: Math.min(3, devicePixelRatio || 1)});
   cv.style.width = (W * geom.cx + geom.padx * 2) + "px";
-  cv.style.height = (H * geom.cy + geom.pady * 2) + "px";
+  cv.style.height = (visibleRows().length * geom.cy + geom.pady * 2) + "px";
 }
 function renderAll(){
   redrawChart();
@@ -673,7 +677,7 @@ function rowRuns(r){
 }
 function renderSteps(){
   renderFocus();
-  $("steps").innerHTML = state.grid.map((_, r) => {
+  $("steps").innerHTML = visibleRows().map(r => {
     const runs = rowRuns(r).map(([c, n]) => `<span class="run">${n}×<i style="background:${c}"></i></span>`).join("");
     return `<button class="step ${r === state.row ? "cur" : ""} ${state.done.has(r) ? "done" : ""}" data-r="${r}">
       <span class="rn">Row ${r + 1}</span><span class="dir">${forward(r) ? "→" : "←"}</span><span class="runs">${runs}</span></button>`;
@@ -686,7 +690,7 @@ function goRow(r, scroll = true){
   const steps = $("steps"), cur = steps.querySelector(".cur");
   if (cur) steps.scrollTop = cur.offsetTop - steps.offsetTop - steps.clientHeight / 2 + cur.clientHeight / 2;
   if (scroll) {
-    const wrap = $("chartWrap"), y = geom.pady + state.row * geom.cy;
+    const wrap = $("chartWrap"), y = geom.pady + visibleRows().indexOf(state.row) * geom.cy;
     if (wrap.scrollHeight > wrap.clientHeight + 2) wrap.scrollTop = y - wrap.clientHeight / 2;
     else scrollTo({top: $("chart").getBoundingClientRect().top + scrollY + y - innerHeight / 2, behavior: "smooth"});
   }
@@ -727,6 +731,7 @@ let unlocked = false;
 function setLock(open){
   unlocked = open;
   document.body.classList.toggle("editing", open);
+  redrawChart(); renderSteps();
   $("lock").textContent = open ? "🔓 Painting ON – tap to lock" : "🔒 Painting locked";
 }
 $("lock").onclick = () => setLock(!unlocked);
@@ -897,7 +902,7 @@ function renderFocus(){
 }
 $("jump").onclick=()=>{const r=Number($("jumpRow").value);if(Number.isInteger(r)&&r>=1&&r<=H)goRow(r-1);else $("jumpRow").reportValidity();};
 $("jumpRow").onkeydown=e=>{if(e.key==="Enter")$("jump").click();};
-$("toggleDone").onclick=()=>{if(state.done.has(state.row))state.done.delete(state.row);else state.done.add(state.row);renderSteps();saveProject();};
+$("toggleDone").onclick=()=>{if(state.done.has(state.row))state.done.delete(state.row);else state.done.add(state.row);redrawChart();renderSteps();saveProject();};
 $("restart").onclick=()=>{if(confirm("Clear completed rows and return to row 1? Your design stays the same.")){state.done.clear();goRow(0,false);}};
 function setMode(tie){document.body.classList.toggle("tying-mode",tie);for(const id of ["designTab","tieTab"]){const active=(id==="tieTab")===tie;$(id).classList.toggle("active",active);$(id).setAttribute("aria-pressed",active);}if(tie){setLock(false);$("tying").scrollIntoView({behavior:"smooth",block:"start"});}redrawChart();}
 $("designTab").onclick=()=>setMode(false);$("tieTab").onclick=()=>setMode(true);
