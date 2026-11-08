@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>YSH Alpha Bracelet</title>
+<title>YSH Studio · Alpha Bracelet</title>
+<meta name="theme-color" content="#171d22">
+<meta name="description" content="Design your YSH alpha bracelet and follow a clear, saved row-by-row tying guide.">
 <style>
 :root{--bg:#1c1c20;--panel:#26262c;--panel2:#2f2f36;--ink:#ececf1;--mute:#9a9aa6;--acc:#ff6a3d;--line:#3a3a42}
 *{box-sizing:border-box}
@@ -79,21 +81,29 @@ body.editing #lockBadge{display:inline-block}
 .run{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
 .run i{width:14px;height:14px;border-radius:3px;border:1px solid #0006;display:inline-block}
 .nav{display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap}
+
+/* Studio layout */
+:root{--bg:#171d22;--panel:#20282e;--panel2:#2b353c;--ink:#f7f3eb;--mute:#bac3c8;--acc:#efb875;--line:#3b474e}
+body{font-size:15px}header{padding-top:32px;padding-bottom:22px}h1{font-size:36px;letter-spacing:-1.2px;font-weight:750}h1 span{color:var(--ink);font-weight:400}.eyebrow{color:var(--acc);font-size:10px;font-weight:800;letter-spacing:2px;margin-bottom:8px}.sub{margin-top:8px;font-size:14px}
+.tabs{max-width:1168px;margin:0 auto 20px;display:flex;gap:8px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:14px}.tabs button{border-radius:30px;padding:11px 20px}.tabs .active{background:var(--acc);color:#201c18;border-color:var(--acc)}#saveStatus{font-size:11px;color:var(--mute);margin-left:auto}
+.card{border-radius:18px;padding:22px;margin-top:18px}.card h2{font-size:11px;letter-spacing:1.3px;color:var(--acc)}.pill{float:right;color:var(--mute);font-size:10px;letter-spacing:0;text-transform:none}.preview-caption{display:flex;justify-content:space-between;gap:12px;font-size:10px;letter-spacing:1px;margin-top:12px;color:var(--mute)}.preview-caption span{letter-spacing:0}#strip{border-radius:12px}.controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.controls label{align-items:stretch;flex-direction:column;font-size:12px}.controls label:has([type=checkbox]){flex-direction:row;align-items:center}button,select,input{min-height:44px}button.primary{color:#241b10}button:disabled{opacity:.45;cursor:default}button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--acc);outline-offset:3px}
+summary{cursor:pointer;font-weight:650;padding:3px 0}summary span{font-size:12px;font-weight:400;color:var(--mute);margin-left:12px}details[open] summary{margin-bottom:18px}.gal{grid-template-columns:repeat(3,minmax(0,1fr));max-height:430px;overflow:auto;padding:3px}.thumb{text-align:left;color:var(--ink);font:inherit;border-radius:12px;padding:10px}.thumb.on{background:#3a3e3d}.orientation{background:#efb87512;border-left:3px solid var(--acc);padding:14px 16px;font-size:13px;margin:16px 0;color:var(--mute)}.orientation b{color:var(--ink)}.tiebar{top:0;padding:12px 0}.tiegrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}#chartWrap{max-height:65vh;overflow:auto!important;min-width:0}.step{min-height:45px;width:100%;border-radius:0;text-align:left;background:transparent;color:var(--ink)}.step.cur{background:#efb87520}.step.done{opacity:.6}.step.done .rn:before{content:'✓ ';color:var(--acc)}#steps{position:relative;max-height:65vh}#rowFocus{background:var(--panel2);padding:18px;border-radius:12px;margin-bottom:14px}.focus-title{display:flex;justify-content:space-between;font-size:13px;margin-bottom:12px}.focus-cells{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:3px}.focus-cell{height:48px;display:flex;align-items:center;justify-content:center;border:1px solid #ffffff35;border-radius:5px;font-weight:700;font-size:13px}.focus-runs{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:12px}.progressline{display:flex;align-items:center;gap:12px;margin:16px 0;font-size:12px}progress{flex:1;min-width:0;height:8px;accent-color:var(--acc)}#jumpRow{width:70px;background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px}body.tying-mode .design-only{display:none}
+@media(max-width:760px){header,main{padding-left:16px;padding-right:16px}header{padding-top:24px}h1{font-size:29px}.tabs{margin:0 16px;flex-wrap:wrap}.tabs button{padding:10px 15px}#saveStatus{width:100%;margin:4px 0 0}.card{padding:16px;border-radius:14px}.controls{grid-template-columns:1fr 1fr}.pill{float:none;display:block;margin-top:6px}.preview-caption{flex-direction:column;gap:4px}.tiegrid{grid-template-columns:1fr}.gal{max-height:350px}.focus-cell{height:36px;font-size:11px}#rowFocus{padding:12px}.tiebar button{padding:9px;font-size:12px}.nav{gap:6px}.nav button{font-size:12px}summary span{display:block;margin:5px 0 0}.step{padding:10px}}
 </style>
 </head>
 <body>
 <header>
-  <h1>Alpha bracelet: <span>YSH</span></h1>
-  <div class="sub">12 knots wide · 65 rows long · alpha pattern. Pick a colour idea, follow the arrows row by row, and click or drag on the chart to make your own changes.</div>
+  <div class="eyebrow">MADE BY YOU, ONE KNOT AT A TIME</div><h1>YSH <span>bracelet studio</span></h1>
+  <div class="sub">A little thread. Something personal. Design your bracelet, then tie it one row at a time.</div>
 </header>
-<main>
+<nav class="tabs" aria-label="Workspace"><button id="designTab" class="active" aria-pressed="true">01 · Design</button><button id="tieTab" aria-pressed="false">02 · Start tying →</button><span id="saveStatus" role="status">Saved on this device</span></nav><main>
   <div class="card">
-    <h2>How it will look</h2>
-    <canvas id="strip"></canvas>
+    <h2>Your finished bracelet <span class="pill">12 strings · 65 rows · 780 knots</span></h2>
+    <canvas id="strip" role="img" aria-label="Finished bracelet, front side, YSH reading left to right"></canvas><div class="preview-caption">FRONT SIDE · START AT THE LEFT END <span>Rotate your tying chart 90° counterclockwise to match this view.</span></div>
   </div>
 
-  <div class="card">
-    <div class="controls">
+  <div class="card design-only">
+    <h2>Make it yours</h2><div class="controls">
       <label>Left end <select id="ends"></select></label>
       <label>Right end <select id="endsR"><option value="same">Same as left</option></select></label>
       <label>Between letters <select id="between"></select></label>
@@ -120,39 +130,37 @@ body.editing #lockBadge{display:inline-block}
     </div>
   </div>
 
-  <div class="card">
-    <h2>Shape ideas</h2>
-    <div id="ideas" class="gal"></div>
-  </div>
+  <details class="card design-only"><summary>Explore shape ideas <span>Hearts, stars, flowers & more</span></summary><div id="ideas" class="gal"></div></details>
 
-  <div class="card">
-    <h2>Colour ideas</h2>
-    <div id="gallery" class="gal"></div>
-  </div>
+  <details class="card design-only" open><summary>Find your colours <span>Pick a palette</span></summary><div id="gallery" class="gal"></div></details>
 
-  <div class="card">
+  <div class="card" id="tying">
     <h2>Tying chart <small id="dims" style="text-transform:none"></small><span id="lockBadge">✏️ Painting ON</span></h2>
     <div class="legend" style="margin-bottom:6px">
       <span><b>→</b> odd rows: tie left to right · forward knots</span>
       <span><b>←</b> even rows: tie right to left · backward knots</span>
     </div>
+    <div class="orientation"><b>Start here: row 1 at the top, working face toward you.</b><br>Keep the same face toward you as you tie. Work down the chart; do not flip it over. The arrows show the working thread’s direction.</div>
     <div class="tiebar">
       <button id="prev">◀ Prev</button>
       <span id="curLabel"></span>
-      <button id="next" class="primary">Next ▶</button>
+      <button id="next" class="primary">Done + next →</button>
     </div>
+    <div id="rowFocus" aria-live="polite"></div>
+    <div class="progressline"><progress id="progress" max="65" value="0" aria-label="Rows completed"></progress><span id="progressText"></span></div>
+    <div class="nav"><label for="jumpRow">Jump to row</label><input id="jumpRow" type="number" min="1" max="65" value="1"><button id="jump">Go</button><button id="toggleDone">Mark row done</button><button id="restart">Restart progress</button></div>
     <div class="tiegrid">
-      <div id="chartWrap"><canvas id="chart"></canvas></div>
+      <div id="chartWrap"><canvas id="chart" role="img" aria-label="Tying chart. Row 1 at top. Use the accessible row list to select rows."></canvas></div>
       <div id="steps"></div>
     </div>
-    <div class="note">Row 1 is the start of the bracelet. Tap a row on the chart or in the list to jump to it. Each row lists its colours in the order you tie them, following the arrow. The letters lie on their side in the chart and read upright on the finished bracelet.</div>
+    <div class="note">This corrected chart replaces the old mirrored chart. If you already started the old pattern, do not switch charts halfway through. Row 1 is the start of a new bracelet. Tap a row on the chart or in the list to jump to it. Each row lists its colours in the order you tie them, following the arrow. The letters lie on their side in the chart and read upright on the finished bracelet.</div>
     <div class="exports">
       <button id="pdf" class="primary">⬇ Download PDF (preview + tying chart)</button>
       <button id="png">Chart PNG</button>
     </div>
   </div>
 
-  <div class="cols">
+  <div class="cols design-only">
     <div class="card">
       <h2>Change knots</h2>
       <div class="nav">
@@ -435,7 +443,9 @@ function buildGrid(v, o){
     p.bmp.forEach((line, i) => [...line].forEach((ch, j) => { const r = start + p.at + j; if (ch === "#" && r < H) { g[r][top + i] = p.col; occ[r][top + i] = true; } }));
   }
   if (o.deco && o.deco !== "none") decorate(g, occ, v, o);
-  return g;
+  // A real 90-degree rotation: chart left maps to the bracelet bottom.
+  // A transpose alone reflects asymmetric letters such as S.
+  return g.map(row => row.slice().reverse());
 }
 
 const hash2 = (r, c) => { let h = Math.imul(r * 374761393 + c * 668265263, 1274126177); h ^= h >>> 13; return (Math.imul(h, 1103515245) >>> 0); };
@@ -540,7 +550,7 @@ function drawBracelet(cv, grid, v, s){
   ctx.restore();
   ctx.save();
   ctx.beginPath(); ctx.roundRect(tail, y0, H * s, W * s, s * 1.2); ctx.clip();
-  for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) drawKnot(ctx, tail + r * s, y0 + c * s, s, grid[r][c]);
+  for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) drawKnot(ctx, tail + r * s, y0 + (W - 1 - c) * s, s, grid[r][c]);
   ctx.restore();
 }
 
@@ -592,7 +602,8 @@ if (!CanvasRenderingContext2D.prototype.roundRect)       // older phones
 
 // ---------- app ----------
 const $ = id => document.getElementById(id);
-const state = {v: 0, grid: null, paint: null, row: 0, done: new Set()};
+let lastProject = null;
+const state = {edited:false, v: 0, grid: null, paint: null, row: 0, done: new Set()};
 const opt = () => ({ends: $("ends").value, endsR: $("endsR").value, between: $("between").value, trail: $("trail").value,
                     deco: $("deco").value, font: $("font").value, gap: +$("gap").value, edge: $("edge").checked});
 
@@ -602,21 +613,26 @@ for (const [k, d] of Object.entries(DECO_SETS)) $("deco").add(new Option(d.name,
 const IDEA_KEYS = ["ends", "endsR", "between", "trail"];
 function applyIdea(idea){
   for (const k of IDEA_KEYS) $(k).value = idea[k] || (k === "endsR" ? "same" : "none");
-  if (idea.deco) $("deco").value = idea.deco;
-  if (idea.font) $("font").value = idea.font;
+  $("deco").value = idea.deco || "none";
+  $("font").value = idea.font || "big";
   if (idea.palette) { state.v = VARIANTS.findIndex(v => v.name === idea.palette); state.paint = null; }
 }
 applyIdea(IDEAS[0]);
 
-function rebuild(){ state.grid = buildGrid(VARIANTS[state.v], opt()); undoStack.length = 0; $("undo").disabled = true; renderAll(); renderGallery(); renderIdeas(); }
+function rebuild(){
+  if(state.grid && (state.edited || state.done.size) && !confirm("Changing the design clears painted edits and tying progress. Continue?")) {
+    if(lastProject){state.v=lastProject.v;for(const [id,value] of Object.entries(lastProject.options)) {if(id==="edge") $(id).checked=value; else $(id).value=value;}}
+    return;
+  }
+  state.edited=false; state.done.clear(); state.row = 0; state.grid = buildGrid(VARIANTS[state.v], opt()); undoStack.length = 0; $("undo").disabled = true; renderAll(); renderGallery(); renderIdeas(); }
 function renderIdeas(){
   const box = $("ideas"), o = opt(), v = VARIANTS[state.v];
   box.innerHTML = "";
   IDEAS.forEach(idea => {
-    const d = document.createElement("div");
+    const d = document.createElement("button");
     const full = {endsR: "same", ...idea};
-    const on = IDEA_KEYS.every(k => full[k] === o[k]);
-    d.className = "thumb" + (on ? " on" : "");
+    const on = IDEA_KEYS.every(k => full[k] === o[k]) && (idea.font || "big") === o.font && (idea.deco || "none") === o.deco;
+    d.className = "thumb" + (on ? " on" : ""); d.setAttribute("aria-pressed", on);
     const cv = document.createElement("canvas");
     const iv = idea.palette ? VARIANTS.find(x => x.name === idea.palette) : v;
     drawBracelet(cv, buildGrid(iv, {...o, ...full}), iv, 6);
@@ -637,14 +653,14 @@ function renderAll(){
   redrawChart();
   drawBracelet($("strip"), state.grid, VARIANTS[state.v], 18);
   $("dims").textContent = `· ${W} wide × ${H} rows · ${VARIANTS[state.v].name}`;
-  renderPaint(); renderCounts(); renderSteps();
+  renderPaint(); renderCounts(); renderSteps(); saveProject();
 }
 function colorsOf(grid){ const m = new Map(); grid.flat().forEach(c => m.set(c, (m.get(c) || 0) + 1)); return [...m.entries()].sort((a, b) => b[1] - a[1]); }
 function renderPaint(){
   const cols = colorsOf(state.grid).map(([c]) => c);
   if (state.paint && !cols.includes(state.paint)) cols.push(state.paint);
   if (!state.paint) state.paint = cols[0];
-  $("paint").innerHTML = cols.map(c => `<span class="sw ${c === state.paint ? "on" : ""}" data-c="${c}"><i style="background:${c}"></i>${c}</span>`).join("");
+  $("paint").innerHTML = cols.map(c => `<button class="sw ${c === state.paint ? "on" : ""}" data-c="${c}"><i style="background:${c}"></i>${c}</button>`).join("");
 }
 function renderCounts(){
   $("counts").innerHTML = colorsOf(state.grid).map(([c, n]) => `<span class="sw"><i style="background:${c}"></i>${n}</span>`).join("");
@@ -656,16 +672,17 @@ function rowRuns(r){
   return runs;
 }
 function renderSteps(){
+  renderFocus();
   $("steps").innerHTML = state.grid.map((_, r) => {
     const runs = rowRuns(r).map(([c, n]) => `<span class="run">${n}×<i style="background:${c}"></i></span>`).join("");
-    return `<div class="step ${r === state.row ? "cur" : ""} ${state.done.has(r) ? "done" : ""}" data-r="${r}">
-      <span class="rn">Row ${r + 1}</span><span class="dir">${forward(r) ? "→" : "←"}</span><span class="runs">${runs}</span></div>`;
+    return `<button class="step ${r === state.row ? "cur" : ""} ${state.done.has(r) ? "done" : ""}" data-r="${r}">
+      <span class="rn">Row ${r + 1}</span><span class="dir">${forward(r) ? "→" : "←"}</span><span class="runs">${runs}</span></button>`;
   }).join("");
   $("curLabel").innerHTML = `<b>Row ${state.row + 1}</b> / ${H}<br>${forward(state.row) ? "→ forward knots" : "← backward knots"}`;
 }
 function goRow(r, scroll = true){
   state.row = Math.max(0, Math.min(H - 1, r));
-  redrawChart(); renderSteps();
+  redrawChart(); renderSteps(); saveProject();
   const steps = $("steps"), cur = steps.querySelector(".cur");
   if (cur) steps.scrollTop = cur.offsetTop - steps.offsetTop - steps.clientHeight / 2 + cur.clientHeight / 2;
   if (scroll) {
@@ -678,8 +695,8 @@ function renderGallery(){
   const gal = $("gallery"), o = opt();
   gal.innerHTML = "";
   VARIANTS.forEach((v, i) => {
-    const d = document.createElement("div");
-    d.className = "thumb" + (i === state.v ? " on" : "");
+    const d = document.createElement("button");
+    d.className = "thumb" + (i === state.v ? " on" : ""); d.setAttribute("aria-pressed", i === state.v);
     const cv = document.createElement("canvas");
     drawBracelet(cv, buildGrid(v, o), v, 6);
     d.append(cv);
@@ -704,8 +721,8 @@ $("surprise").onclick = () => {
 $("arrows").onchange = redrawChart;
 $("reset").onclick = rebuild;
 $("steps").onclick = e => { const s = e.target.closest(".step"); if (s) goRow(+s.dataset.r, false); };
-$("next").onclick = () => { state.done.add(state.row); goRow(state.row + 1); };
-$("prev").onclick = () => { state.done.delete(state.row - 1); goRow(state.row - 1); };
+$("next").onclick = () => { state.done.add(state.row); goRow(state.row + 1, false); };
+$("prev").onclick = () => goRow(state.row - 1, false);
 let unlocked = false;
 function setLock(open){
   unlocked = open;
@@ -718,9 +735,9 @@ let resizeT; addEventListener("resize", () => { clearTimeout(resizeT); resizeT =
 // Painting: mouse can drag; on touch screens only a clean tap paints, so swiping always scrolls.
 let painting = false, lastPointer = "mouse";
 const undoStack = [];
-const refreshAfterPaint = () => { redrawChart(); drawBracelet($("strip"), state.grid, VARIANTS[state.v], 18); renderCounts(); renderSteps(); $("undo").disabled = !undoStack.length; };
+const refreshAfterPaint = () => { redrawChart(); drawBracelet($("strip"), state.grid, VARIANTS[state.v], 18); renderCounts(); renderSteps(); saveProject(); $("undo").disabled = !undoStack.length; };
 const paintAt = ev => { const p = pickCell($("chart"), ev); if (!p) return; const [r, c] = p;
-  if (state.grid[r][c] !== state.paint) { undoStack.push([r, c, state.grid[r][c]]); state.grid[r][c] = state.paint; refreshAfterPaint(); } };
+  if (state.grid[r][c] !== state.paint) { undoStack.push([r, c, state.grid[r][c]]); state.grid[r][c] = state.paint; state.edited=true; state.done.delete(r); refreshAfterPaint(); } };
 $("chart").addEventListener("pointerdown", e => {
   lastPointer = e.pointerType;
   if (e.button === 2 || !unlocked || e.pointerType !== "mouse") return;
@@ -732,7 +749,7 @@ $("chart").addEventListener("click", e => {
   const p = pickCell($("chart"), e); if (p) goRow(p[0], false);
 });
 addEventListener("pointerup", () => { if (painting) renderPaint(); painting = false; });
-$("undo").onclick = () => { const h = undoStack.pop(); if (!h) return; state.grid[h[0]][h[1]] = h[2]; refreshAfterPaint(); renderPaint(); };
+$("undo").onclick = () => { const h = undoStack.pop(); if (!h) return; state.grid[h[0]][h[1]] = h[2]; state.done.delete(h[0]); refreshAfterPaint(); renderPaint(); };
 $("chart").addEventListener("contextmenu", e => { e.preventDefault(); const p = pickCell($("chart"), e); if (p) { state.paint = state.grid[p[0]][p[1]]; renderPaint(); } });
 
 const fileBase = () => `YSH-alpha-${VARIANTS[state.v].name.replace(/\W+/g, "-")}`;
@@ -772,22 +789,24 @@ async function exportPDF(){
     doc.text("YSH alpha bracelet", M, M + 8);
     doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(90);
     doc.text(`${v.name}  ·  12 knots wide x 65 rows  ·  ${grid.flat().length} knots`, M, M + 15);
-    doc.text(`Ends: ${shapeName(o.ends)} / ${shapeName(o.endsR)}   Between letters: ${shapeName(o.between)}   Trail: ${shapeName(o.trail)}`, M, M + 21);
+    doc.text(doc.splitTextToSize(`Ends: ${shapeName(o.ends)} / ${shapeName(o.endsR)}   Between letters: ${shapeName(o.between)}   Trail: ${shapeName(o.trail)}`, PW - 2*M), M, M + 21);
     const pv = document.createElement("canvas");
     drawBracelet(pv, grid, v, 22);
     const pvW = PW - 2 * M, pvH = pvW * pv.height / pv.width;
-    doc.addImage(pv.toDataURL("image/jpeg", 0.92), "JPEG", M, M + 27, pvW, pvH);
-    let y = M + 27 + pvH + 12;
+    doc.addImage(pv.toDataURL("image/jpeg", 0.92), "JPEG", M, M + 34, pvW, pvH);
+    let y = M + 34 + pvH + 12;
     doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.setTextColor(30);
     doc.text("Colours", M, y); y += 7;
     doc.setFont("helvetica", "normal"); doc.setFontSize(11);
     for (const [c, n] of colorsOf(grid)) {
+      if(y > PH-30){doc.addPage();y=M+10;}
       doc.setFillColor(...rgb(c)); doc.setDrawColor(120); doc.setLineWidth(0.2);
       doc.roundedRect(M, y - 4.5, 9, 6, 1, 1, "FD");
       doc.setTextColor(40); doc.text(`${c.toUpperCase()}  —  ${n} knots`, M + 13, y);
       y += 9;
     }
     y += 5;
+    if(y > PH-85){doc.addPage();y=M+10;}
     doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.text("How to read the chart", M, y); y += 7;
     doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.setTextColor(50);
     [
@@ -795,10 +814,10 @@ async function exportPDF(){
       "Odd rows (1, 3, 5...): tie left to right with forward knots (arrow points right).",
       "Even rows (2, 4, 6...): tie right to left with backward knots (arrow points left).",
       "Next to each row, the colours are listed in the order you tie them, e.g. 4 pink, 2 white, 6 pink.",
-      "The letters lie on their side in the chart; they read upright on the finished bracelet.",
+      "Keep the working face toward you. Rotate the chart 90 degrees counterclockwise to match the preview.",
       "Tick the box next to a row when it's done so you never lose your place.",
     ].forEach(t => { const lines = doc.splitTextToSize("•  " + t, PW - 2 * M); doc.text(lines, M, y); y += lines.length * 6; });
-    footer(1, total);
+
 
     // chart pages
     const per = Math.ceil(H / chartPages), cw = 7, ch = 7, cx0 = M + 9, top = M + 16;
@@ -839,8 +858,9 @@ async function exportPDF(){
           sx += unit;
         }
       }
-      footer(p + 2, total);
+
     }
+    for(let page=1;page<=doc.getNumberOfPages();page++){doc.setPage(page);footer(page,doc.getNumberOfPages());}
     doc.save(fileBase() + ".pdf");
   } catch (err) {
     alert(err.message);
@@ -850,7 +870,38 @@ async function exportPDF(){
 }
 $("pdf").onclick = exportPDF;
 
-rebuild();
+// Version 2 stores only charts with the corrected rotation.
+const STORAGE_KEY = "ysh-studio-v2";
+function saveProject(){
+  lastProject={v:state.v, grid:state.grid, row:state.row, done:[...state.done], options:opt(),edited:state.edited};
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(lastProject)); $("saveStatus").textContent="Saved on this device"; }
+  catch { $("saveStatus").textContent="Saving unavailable · keep this tab open"; }
+}
+function restoreProject(){
+  try {
+    const d=JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if(!d || !Number.isInteger(d.v) || !VARIANTS[d.v] || !Number.isInteger(d.row) || d.row<0 || d.row>=H || !Array.isArray(d.grid) || d.grid.length!==H || !d.grid.every(r=>Array.isArray(r)&&r.length===W&&r.every(c=>/^#[0-9a-f]{6}$/i.test(c))) || !Array.isArray(d.done)) return false;
+    for(const [id,value] of Object.entries(d.options || {})) { const el=$(id); if(!el || !["ends","endsR","between","trail","deco","font","gap","edge"].includes(id)) return false; if(el.type!=="checkbox" && ![...el.options].some(o=>o.value===String(value))) return false; }
+    for(const [id,value] of Object.entries(d.options || {})) { if(id==="edge") $(id).checked=!!value; else $(id).value=value; }
+    state.edited=!!d.edited; state.v=d.v; state.grid=d.grid; state.row=d.row; state.done=new Set(d.done.filter(r=>Number.isInteger(r)&&r>=0&&r<H));
+    return true;
+  } catch { return false; }
+}
+function colorLabel(c){const v=VARIANTS[state.v];return c===v.bg?"Background":c===v.letter?"Letter":c===v.heart || c===v.accent?"Accent":c.toUpperCase();}
+function renderFocus(){
+  const r=state.row, dir=forward(r), cols=state.grid[r];
+  $("rowFocus").innerHTML=`<div class="focus-title"><b>Row ${r+1} · ${dir?"Start at the left →":"← Start at the right"}</b><span>${state.done.has(r)?"✓ Done":"12 knots"}</span></div><div class="focus-cells">${cols.map((c,i)=>`<span class="focus-cell" style="background:${c};color:${luminance(c)>.55?"#111":"#fff"}" title="String ${i+1}: ${colorLabel(c)}">${dir?i+1:W-i}</span>`).join("")}</div><div class="focus-runs">${rowRuns(r).map(([c,n])=>`<span class="run"><i style="background:${c}"></i>${n} × ${colorLabel(c)}</span>`).join("")}</div><div class="note">Numbers show tying order. Read colour groups from left to right; their order already follows the arrow.</div>`;
+  $("progress").value=state.done.size; $("progressText").textContent=state.done.size===H?"All 65 rows complete ✓":`${state.done.size} / ${H} rows complete`;
+  $("prev").disabled=r===0; $("next").disabled=r===H-1&&state.done.has(r); $("next").textContent=r===H-1?"Finish bracelet ✓":"Done + next →";
+  $("jumpRow").value=r+1; $("toggleDone").textContent=state.done.has(r)?"Mark unfinished":"Mark row done";
+}
+$("jump").onclick=()=>{const r=Number($("jumpRow").value);if(Number.isInteger(r)&&r>=1&&r<=H)goRow(r-1);else $("jumpRow").reportValidity();};
+$("jumpRow").onkeydown=e=>{if(e.key==="Enter")$("jump").click();};
+$("toggleDone").onclick=()=>{if(state.done.has(state.row))state.done.delete(state.row);else state.done.add(state.row);renderSteps();saveProject();};
+$("restart").onclick=()=>{if(confirm("Clear completed rows and return to row 1? Your design stays the same.")){state.done.clear();goRow(0,false);}};
+function setMode(tie){document.body.classList.toggle("tying-mode",tie);for(const id of ["designTab","tieTab"]){const active=(id==="tieTab")===tie;$(id).classList.toggle("active",active);$(id).setAttribute("aria-pressed",active);}if(tie){setLock(false);$("tying").scrollIntoView({behavior:"smooth",block:"start"});}redrawChart();}
+$("designTab").onclick=()=>setMode(false);$("tieTab").onclick=()=>setMode(true);
+if(restoreProject()){renderAll();renderGallery();renderIdeas();}else rebuild();
 </script>
 </body>
 </html>
